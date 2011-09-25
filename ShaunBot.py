@@ -85,6 +85,10 @@ STATE_FILE = 'state' # For saving data in between restarts. pickle ftw!
 
 # EXCEPT:
 # The hardcoded ADMINS group which cannot be modified.
+# The hardcoded FLAT_MEMBERS group, because we use this to run our Minecraft Server.
+# (Are you honestly surprised?)
+
+
 
 
 
