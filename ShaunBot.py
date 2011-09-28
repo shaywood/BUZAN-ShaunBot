@@ -359,6 +359,7 @@ class ShaunBot:
 		
 		Grp = IRCNickGroup(Nickname)		
 		self.Nickgroups.append(Grp)
+		self.NewestNickGroup = Grp
 
 		return Grp
 
@@ -782,9 +783,10 @@ class ShaunBot:
 		self.LogFile = None
 		self.OfflineMessageList = OfflineMessageList()
 		self.Nickgroups = []
+		self.NewestNickGroup = None
 		self.Groups = [] # Of IRCAccessGroups
 		self.CommandList = None
-		self.Bot = None
+		self.Bot = None	
 
 		# Also, now set the NickServPass:
 		global NICKSERV_PASS
@@ -797,9 +799,10 @@ class ShaunBot:
 
 	def OnJoin(self, Sender, Headers, Message):
 		Grp = self.GetGroupOfNickname(Sender)
-		if Grp == self.Nickgroups[len(self.Nickgroups) - 1]:
+		if Grp == self.NewestNickGroup:
 			# This is the first time we have met this person:
 			self.Say([CHANNEL], "Hello " + Sender + "! Welcome to #BUZAN, the IRC channel for Bristol's own Zombie defence society! Type !help for !help")
+			self.NewestNickGroup = None
 
 		# Deliver the message:		
 		Messages = self.OfflineMessageList.CheckForMessages(Grp)
