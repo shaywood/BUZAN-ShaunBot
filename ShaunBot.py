@@ -808,21 +808,21 @@ class ShaunBot:
 	def LagHandler(self):
 		# Due to network latency, best to wait for
 		# numeric "376" (end of MOTD) before trying to join and ID with NickServ	
-		Self.Bot.join(CHANNEL)
-		Self.Bot.say("NICKSERV", "identify " + NICKSERV_PASS)
+		self.Bot.join(CHANNEL)
+		self.Bot.say("NICKSERV", "identify " + NICKSERV_PASS)
 
 
 	# Main bot function:
 	def Run(self):
 		global BINDINGS
 	
-		bot = ircBot(NETWORK, PORT, NICKNAME, DESCRIPTION)
+		self.Bot = ircBot(NETWORK, PORT, NICKNAME, DESCRIPTION)
 		for Binding in BINDINGS:
-			bot.bind(Binding[0], Binding[1])
+			self.Bot.bind(Binding[0], Binding[1])
     
-		bot.connect()
+		self.Bot.connect()
 		# Joining and IDing with NickServ handled in LagHandler
-		bot.run()
+		self.Bot.run()
 		
 	
 #############################################
