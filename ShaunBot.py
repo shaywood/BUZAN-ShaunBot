@@ -289,11 +289,107 @@ CMD_USAGE = 3
 CMD_HELP = 4
 
 class ShaunBot:
+	# Utility functions:
+	def Say(self, [Dests], Message):
+		for Dest in Dests:
+			self.Bot.say(Dest, Message)
+	
+	# Private functions:
+	def I_GetZTL(self):	
+		# Returns correctly formatted ZTL string:
+		if self.ZTL != len(ZOMBIE_THREAT_LEVELS) - 1:
+			return "Zombie Threat Level: " + ZOMBIE_THREAT_LEVELS[self.ZTL]
+		else: # The highest one has grammar that breaks if returned as above, thus:
+			return ZOMBIE_THREAT_LEVELS[self.ZTL]
+
+	def I_SetZTL(self, NewZTL, UserProvidedValue, Command):						
+		# Returns the string to be said by the bot as a result of this attempt to change ZTL		
+		# If UserProvidedValue, return usage, else,
+		# return silly messages about how relaxed/stressed the bot it based on NewZTL:
+
+		if NewZTL < 0:
+			if UserProvidedValue:
+				return Command[CMD_USAGE]
+			else:
+				return "Cannot lower the zombie threat level because I am too relaxed..."
+		elif NewZTL >= len(ZOMBIE_THREAT_LEVELS):
+			if UserProvidedValue:
+				return Command[CMD_USAGE]
+			else:
+				return "Cannot raise the zombie threat level because there are zombies at the door!!"
+		elif NewZTL == self.ZTL:
+			return "The Zombie Threat Level remains at: " + ZOMBIE_THREAT_LEVELS[self.ZTL]
+		elif NewZTL > self.ZTL:			
+			self.ZTL = NewZTL
+			
+			if self.ZTL != len(ZOMBIE_THREAT_LEVELS) - 1:			
+				return "Warning! Zombie Threat Level raised to: " + ZOMBIE_THREAT_LEVELS[self.ZTL]
+			else: # See above remark about grammar:
+				return ZOMBIE_THREAT_LEVELS[self.ZTL]
+		else: # NewZTL < ZTL:
+			self.ZTL = NewZTL			
+			return "Good news! Zombie Threat Level lowered to: " + ZOMBIE_THREAT_LEVELS[self.ZTL]
+
+	# Command implementations:	
+	def GetZTL(self, Sender, ReplyTo, Headers, Message, Command):		
+		if Message == CMD_GET_ZTL:
+			self.Say([ReplyTo], self.I_GetZTL())
+			return True
+		else:
+			return False
+	
+	def SetZTL(self, Sender, ReplyTo, Headers, Message, Command):
+		# Changes to the ZTL get relayed to the channel, even if issued in private	
+		global ZTL
+	
+		if Message == CMD_THREAT_PLUS:
+			Say(Bot, [CHANNEL], I_SetZTL(ZTL + 1, False, Command))	
+		elif Message == CMD_THREAT_MINUS:
+			Say(Bot, [CHANNEL], I_SetZTL(ZTL - 1, False, Command))
+		else:
+			# Should be of form !threat N, where N is an integer within the limits of ZOMBIE_THREAT_LEVELS
+			# Deal with it:		
+			Parts = Message.split(' ')
+			if Parts[0] == "!threat":
+				try:
+					NewZTL = int(Parts[1])
+					Say(Bot, [CHANNEL], I_SetZTL(NewZTL, True, Command))
+				except:
+					Say(Bot, [Sender], Command[CMD_USAGE])
+			else:
+				return False # Couldn't make sense of this at all!!
+				# (eg: !threatargleflargleblargle) - o0
+
+		return True
+	
+	def GetNerfSocial(self, Sender, ReplyTo, Headers, Message, Command):
+		if Message == CMD_NERF_SOCIAL:
+			self.Say([ReplyTo], "The next nerf social will be: " + NerfSocial)	
+
+			return True
+		else:
+			return False
+
+	def SetNerfSocial(self, Sender, ReplyTo, Headers, Message, Command):	
+		if Message.startswith(CMD_NERF_SOCIAL):					
+			# is Message of the form !nerfsocial <string containing new nerf social>?
+			NewNerfSocial = Message[len(CMD_NERF_SOCIAL) + 1:]
+			
+			if NewNerfSocial != "":
+				self.NerfSocial = NewNerfSocial
+				# Nerf Social changes should be relayed to the channel:										
+				self.Say([CHANNEL], "The next Nerf Social will now be: " + NerfSocial)
+			
+				return True
+			else:
+				return False
+
+	
+
 	# Commands to do:
 	# !insult <nick> <style>, where style can be any of... :D
-	# !committee - gives the sender committee contact info. This needs to be settable, so I need a committee group.
+	# !committee - gives the sender committee contact info. This needs to be settable, so I need a committee group and a place to dump this info.
 	# !meet <nick> - adds <nick> to the bot's list of known people, if it isn't in there already.
-
 	# CMD, CLASS, GROUPS, USAGE, HELP
 	COMMANDS = [
 		[CMD_GET_ZTL, GetZTLCommand, [], CMD_GET_ZTL, "Gets the current Zombie Threat Level"],	
@@ -335,6 +431,7 @@ class ShaunBot:
 	
 #############################################
 # Main program:
-ShaunBot = 
+ShaunBotInst = ShaunBot()
+ShaunBotInst.Run()
 
-
+print "Quitting sanely..."
