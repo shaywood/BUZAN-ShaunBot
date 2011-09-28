@@ -286,7 +286,7 @@ CMD_CMD = 0
 CMD_FUNC = 1
 CMD_GROUPS = 2
 CMD_USAGE = 3
-CMD_HELP = 4
+CMD_HELP_TEXT = 4
 
 class ShaunBot:
 	# Utility functions:
@@ -294,6 +294,12 @@ class ShaunBot:
 		for Dest in Dests:
 			self.Bot.say(Dest, Message)
 	
+	def GetHelpMessage(Cmd):
+		return Cmd[CMD_USAGE] + " - " + Cmd[CMD_HELP_TEXT]
+
+	def OnAuthFailure(Bot):
+		# Do nothing. Useful as I have to specify it... :/
+
 	# Private functions:
 	def I_GetZTL(self):	
 		# Returns correctly formatted ZTL string:
@@ -348,7 +354,7 @@ class ShaunBot:
 			# Should be of form !threat N, where N is an integer within the limits of ZOMBIE_THREAT_LEVELS
 			# Deal with it:		
 			Parts = Message.split(' ')
-			if Parts[0] == "!threat":
+			if Parts[0] == CMD_SET_ZTL:
 				try:
 					NewZTL = int(Parts[1])
 					self.Say([CHANNEL], self.I_SetZTL(NewZTL, True, Command))
@@ -383,8 +389,7 @@ class ShaunBot:
 				return False
 
 	def GetPubSocial(self, Sender, ReplyTo, Headers, Message, Command):
-		if Message == CMD_PUB_SOCIAL:			
-
+		if Message == CMD_PUB_SOCIAL:
 			self.Say([ReplyTo], "The next pub social will be: " + self.PubSocial)	
 
 			return True
@@ -402,6 +407,16 @@ class ShaunBot:
 			return True
 		else:
 			return False
+		
+
+	def OnHelpAuthSuccess(IRCBot, ShaunBotInst, Dest, HelpMessage):
+		ShaunBot.Say([Dest], HelpMessage)	
+
+	def GeneralHelp(self, Sender, ReplyTo, Headers, Message, Command):	
+		# FIXME when we sort out the way commands will be held in memory...
+
+	
+
 
 	# Commands to do:
 	# !insult <nick> <style>, where style can be any of... :D
@@ -409,7 +424,7 @@ class ShaunBot:
 	# !committee - gives the sender committee contact info. This needs to be settable, so I need a committee group and a place to dump this info.
 	# !meet <nick> - adds <nick> to the bot's list of known people, if it isn't in there already.
 	# CMD, CLASS, GROUPS, USAGE, HELP
-	COMMANDS = [
+	DEFAULT_COMMANDS = [
 		[CMD_GET_ZTL, GetZTLCommand, [], CMD_GET_ZTL, "Gets the current Zombie Threat Level"],	
 		[CMD_SET_ZTL, SetZTLCommand, [ADMINS], "!threat+, !threat-, !threat N", "Sets the Zombie Threat Level"],
 		[CMD_NERF_SOCIAL, GetNerfSocialCommand, [], CMD_NERF_SOCIAL, "Gets the info about the next Nerf Social"],
