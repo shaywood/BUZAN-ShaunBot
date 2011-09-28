@@ -416,7 +416,38 @@ class ShaunBot:
 	def GeneralHelp(self, Sender, ReplyTo, Headers, Message, Command):	
 		# FIXME when we sort out the way commands will be held in memory...
 
+	def SpecificHelp(self, Sender, ReplyTo, Headers, Message, Command):
+		# FIXME when we sort out the way commands will be held in memory...
+
+	def Blarg(self, Sender, ReplyTo, Headers, Message, Command):
+		self.Say([ReplyTo], "BLARG!")
+
+		return True
+
+	def Quit(self, Sender, ReplyTo, Headers, Message, Command):
+		QuitMsg = Message[len(CMD_QUIT) + 1:]	
+		
+		if QuitMsg == '':
+			QuitMsg = "Quiting because " + Sender + " told me to."
 	
+		self.Bot.disconnect(QuitMsg)	
+
+		self.RestartSelf = False
+		Bot.stop() # Causes Bot.run() to return
+
+		return True
+	
+	def Restart(self, Sender, ReplyTo, Headers, Message, Command):
+		QuitMsg = Message[len(CMD_RESTART) + 1:]
+		if QuitMsg == '':
+			QuitMsg = "Restarting because " + Sender + " told me to."
+
+		self.Bot.disconnect(QuitMsg)
+		
+		self.RestartSelf = True		
+		self.Bot.stop()
+
+		return True
 
 
 	# Commands to do:
