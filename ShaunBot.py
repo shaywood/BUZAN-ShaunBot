@@ -339,13 +339,11 @@ class ShaunBot:
 			return False
 	
 	def SetZTL(self, Sender, ReplyTo, Headers, Message, Command):
-		# Changes to the ZTL get relayed to the channel, even if issued in private	
-		global ZTL
-	
+		# Changes to the ZTL get relayed to the channel, even if issued in private		
 		if Message == CMD_THREAT_PLUS:
-			Say(Bot, [CHANNEL], I_SetZTL(ZTL + 1, False, Command))	
+			self.Say([CHANNEL], self.I_SetZTL(self.ZTL + 1, False, Command))	
 		elif Message == CMD_THREAT_MINUS:
-			Say(Bot, [CHANNEL], I_SetZTL(ZTL - 1, False, Command))
+			self.Say([CHANNEL], self.I_SetZTL(self.ZTL - 1, False, Command))
 		else:
 			# Should be of form !threat N, where N is an integer within the limits of ZOMBIE_THREAT_LEVELS
 			# Deal with it:		
@@ -353,9 +351,9 @@ class ShaunBot:
 			if Parts[0] == "!threat":
 				try:
 					NewZTL = int(Parts[1])
-					Say(Bot, [CHANNEL], I_SetZTL(NewZTL, True, Command))
+					self.Say([CHANNEL], self.I_SetZTL(NewZTL, True, Command))
 				except:
-					Say(Bot, [Sender], Command[CMD_USAGE])
+					self.Say([Sender], Command[CMD_USAGE])
 			else:
 				return False # Couldn't make sense of this at all!!
 				# (eg: !threatargleflargleblargle) - o0
@@ -364,7 +362,7 @@ class ShaunBot:
 	
 	def GetNerfSocial(self, Sender, ReplyTo, Headers, Message, Command):
 		if Message == CMD_NERF_SOCIAL:
-			self.Say([ReplyTo], "The next nerf social will be: " + NerfSocial)	
+			self.Say([ReplyTo], "The next nerf social will be: " + self.NerfSocial)	
 
 			return True
 		else:
@@ -378,16 +376,36 @@ class ShaunBot:
 			if NewNerfSocial != "":
 				self.NerfSocial = NewNerfSocial
 				# Nerf Social changes should be relayed to the channel:										
-				self.Say([CHANNEL], "The next Nerf Social will now be: " + NerfSocial)
+				self.Say([CHANNEL], "The next Nerf Social will now be: " + self.NerfSocial)
 			
 				return True
 			else:
 				return False
 
-	
+	def GetPubSocial(self, Sender, ReplyTo, Headers, Message, Command):
+		if Message == CMD_PUB_SOCIAL:			
+
+			self.Say([ReplyTo], "The next pub social will be: " + self.PubSocial)	
+
+			return True
+		else:
+			return False
+
+	def SetPubSocial(self, Sender, ReplyTo, Headers, Message, Command):	
+		# Of form !nerfsocial <string containing new nerf social>?
+		NewPubSocial = Message[len(CMD_PUB_SOCIAL) + 1:]
+		if NewPubSocial != "":
+			self.PubSocial = NewPubSocial
+			# Pub Social changes should be relayed to the channel:										
+			self.Say([CHANNEL], "The next Pub Social will now be: " + self.PubSocial)
+			
+			return True
+		else:
+			return False
 
 	# Commands to do:
 	# !insult <nick> <style>, where style can be any of... :D
+	# (Related: !addinsult <style> <text, with %n as nickname; !removeinsult <style> <enough text to uniquely ID it>)
 	# !committee - gives the sender committee contact info. This needs to be settable, so I need a committee group and a place to dump this info.
 	# !meet <nick> - adds <nick> to the bot's list of known people, if it isn't in there already.
 	# CMD, CLASS, GROUPS, USAGE, HELP
