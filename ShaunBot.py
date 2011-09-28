@@ -449,6 +449,43 @@ class ShaunBot:
 
 		return True
 
+	def Logging(self, Sender, ReplyTo, Headers, Message, Command):		
+		if (self.LogFile != None) and (not self.LogFile.closed):
+			# Logging is channel-level info:			
+			self.Say([CHANNEL], "I am currently logging this channel.")
+		else:
+			self.Say([CHANNEL], "No logging in progress.")    
+
+		return True
+
+	def StartLog(self, Sender, ReplyTo, Headers, Message, Command):
+		if self.LogFile == None:
+			try:
+				self.LogFile = open(LOG_FILE, 'a')
+				self.Say([CHANNEL], "Logging started by " + Sender)      
+			except:
+				self.LogFile = None
+				self.Say([Sender], "Error - Unable to start logging at this time!")
+		else:
+			self.Say([CHANNEL], "I am already logging!")
+
+		return True
+		
+	def StopLog(self, Sender, ReplyTo, Headers, Message, Command):
+		if self.LogFile != None:
+			try:
+				self.Say([CHANNEL], "Logging stopped by " + whoFrom)
+			  
+				self.LogFile.flush()
+				self.LogFile.close()
+				self.LogFile = None        
+			except:
+				self.Say([Sender], "Error - Unable to stop logging at this time!")			
+		else:
+			self.Say([CHANNEL], "I am not currently logging!") 
+		
+		return True
+		
 
 	# Commands to do:
 	# !insult <nick> <style>, where style can be any of... :D
