@@ -478,11 +478,7 @@ class ShaunBot:
 		return True
 
 	def BlargCommand(self, Sender, ReplyTo, Headers, Message, Command):
-		self.Say([ReplyTo], "BLARG!")Dest = Sections[1]
-	
-	Message = ''	
-	for i in range(2, len(Sections)):
-		Message = Message + Sections[i] + ' '
+		self.Say([ReplyTo], "BLARG!")
 
 		return True
 
