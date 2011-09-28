@@ -331,7 +331,7 @@ class ShaunBot:
 			self.Bot.say(Dest, Message)
 	
 	def Log(self, Sender, Dest, Message):
-		LogStr = asctime() + "<" + From + "> " + To + ": " + Message		
+		LogStr = asctime() + "<" + Sender + "> " + Dest + ": " + Message		
 		print LogStr
 
 		if self.LogFile != None:
