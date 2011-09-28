@@ -52,7 +52,7 @@ PER_NICK_MESSAGE_LIMIT = 20
 # Local files:
 LOG_FILE = 'log'
 CMD_LOG_FILE = 'cmd_log'
-STATE_FILE = 'state' # For saving data in between restarts. pickle ftw!
+STATE_FILE = 'state' # For saving data in between restarts.
 
 # Command grouping:
 # Each PERSON has 1 or more NICKS. (For instance, I use CarrierII and EtherealII as a backup)
@@ -68,6 +68,8 @@ STATE_FILE = 'state' # For saving data in between restarts. pickle ftw!
 # being permitted to do anything (unless the commmand permits anyone to execute it)
 # And you must confirm the alias by switching to the alias, IDing with NickServ if required, then
 # issuing !confirmalias
+
+# You may issue !rejectalias, which does the opposite.
 
 # !Aliases // Lists the nicknames within the NICK GROUP belonging to the sender
 # If the sender has no group, then it finds the NICK GROUP which contains the sender,
@@ -114,10 +116,11 @@ CMD_STOP_LOGGING = "!stoplog"
 CMD_ABOUT = "!about"
 CMD_TELL = "!tell"
 
-CMD_MC_RESTART = "!restartmc"
-CMD_MC_STOP = "!stopmc"
-CMD_MC_START = "!startmc"
+CMD_MC_RESTART = "!mcrestart"
+CMD_MC_STOP = "!mcstop"
+CMD_MC_START = "!mcstart"
 CMD_MC_STATUS = "!mcstatus"
+CMD_MC_CONSOLE = "!mcconsole"
 
 # Minecraft related stuff:
 MINECRAFT_DIR = "~/Downloads/minecraft-server/"
@@ -134,7 +137,6 @@ import subprocess # for restarting ourselves
 from time import asctime # for timestamps
 import random # for trolling Boff - I mean this.
 import minecraftserver # <OWL>
-import cpickle # data persistance and rage induction
 from datetime import datetime, timedelta
 import threading # for regular backups
 
@@ -152,7 +154,7 @@ class IRCNickGroup:
 		self.Nicks.append(Nickname)
 		
 		self.OriginalNick = Nickname
-		self.CreationTime = datetime.now()
+		self.LastSeen = datetime.now()
 
 	def AddNickname(self, Nickname):
 		if Nickname not in self.Nicks:			
@@ -173,8 +175,8 @@ class IRCNickGroup:
 		else:
 			return False
 
-	def GetCreationTime(self):
-		return self.CreationTime
+	def GetLastSeen(self):
+		return self.LastSeen
 
 	def GetMasterNickname(self):
 		return self.OriginalNick
@@ -275,98 +277,55 @@ class OfflineMessage:
 	def GetDestNick(self):
 		return self.Dest
 
-class Command:
-	""" Class used to encapsulate a command.
-
-		Actual commands are subclasses of this command, with the following methods
-		1) Execute(self, Bot, Sender, ReplyTo, Headers, Message)
-			- Inspects Message and acts accordingly. Returns False if Message
-			  was not syntatically valid, True otherwise. Major errors can be exceptions.
-				"""
-	def __init__(self, CommandText, HelpText, Usage):
-		""" CommandText is the string (eg: !threat) that corresponds to this command
-			HelpText eg: "Returns the current zombie threat level"
-			Usage eg: "!threat" """		
-
-		self.CommandText = CommandText.lower()
-		self.AccessGroups = CMDAccessGroup()
-
-	def _OnAuthSuccess(Bot, Cmd, Sender, ReplyTo, Headers, Message):
-		""" Called when NickServ confirms that Sender is who they say they are """
-		# Cmd is the command object, we simply call execute on it:
-		Cmd.Execute(Bot, Sender, ReplyTo, Headers, Message)
-
-		# We disregard the result of Execute.			
-
-	def AddAccessGroup(self, AccessGroup):
-		return self.AccessGroups.AddAccessGroup(AccessGroup) # 'sup dawg? I herd...
-
-	def Dispatch(self, Bot, Sender, ReplyTo, Headers, Message):
-		if Message.contains(' '):		
-			FirstWord = Message.split(' ')[0]
-		else:
-			FirstWord = Message
-
-		if FirstWord.lower() == self.CommandText:
-			if not self.AccessGroup.AllowAnyone():
-				if Sender in self.AccessGroup:
-					# Auth stuff:
-					Bot.identify(Sender, Command._OnAuthSuccess, [self, Sender, ReplyTo, Headers, Message], OnAuthFailure, [])
-					# Request made, and callback will be called on completion:
-					return True
-					
-			else:
-				# direct dispatch:
-				return self.Execute(Bot, Sender, ReplyTo, Headers, Message)
-
-	def Execute(self, Bot, Sender, ReplyTo, Headers, Message):
-		pass
-
-class GetZTLCommand [Command]:
-	def Execute(self, Bot, Sender, ReplyTo, Headers, Message):
-		if Message.stip().lower() == self.CommandText:
-			# Command implementation here
-			return None
-
 # Some final constants:
 # Default command listing.
 # Note the CMD_GROUPS section will be used if there is no state file.
 # (ie: the bot is starting for the first time)
 
 CMD_CMD = 0
-CMD_CLASS = 1
+CMD_FUNC = 1
 CMD_GROUPS = 2
 CMD_USAGE = 3
 CMD_HELP = 4
 
-# CMD, CLASS, GROUPS, USAGE, HELP
-COMMANDS = [
-	[CMD_GET_ZTL, GetZTLCommand, [], CMD_GET_ZTL, "Gets the current Zombie Threat Level"],	
-	[CMD_SET_ZTL, SetZTLCommand, [ADMINS], "!threat+, !threat-, !threat N", "Sets the Zombie Threat Level"],
-	[CMD_NERF_SOCIAL, GetNerfSocialCommand, [], CMD_NERF_SOCIAL, "Gets the info about the next Nerf Social"],
-	[CMD_NERF_SOCIAL, SetNerfSocialCommand, [ADMINS], "!nerfsocial <helpful and informative text>", "Sets the Nerf Social info"],
-	[CMD_QUIT, QuitCommand, [ADMINS], "!quit <message>", "Makes the bot quit. Requires a MANUAL restart"],
-	[CMD_RESTART, RestartCommand, [ADMINS], "!restart <message>", "Restarts the bot"],
-	[CMD_BLARG, BlargCommand, [], "", ""],
-	[CMD_ABOUT, AboutCommand, [], CMD_ABOUT, "Returns info about the bot"],
-	[CMD_LOGGING, LoggingCommand, [], CMD_LOGGING, "Indicates whether or not the bot is currently logging"],
-	[CMD_START_LOGGING, StartLogCommand, [ADMINS], CMD_START_LOGGING, "Makes the bot log all messages it can see"],
-	[CMD_STOP_LOGGING, StopLogCommand, [ADMINS], CMD_STOP_LOGGING, "Stops the bot logging messages"],
-	[CMD_HELP, GeneralHelpCommand, [], CMD_HELP, "Returns a list of commands"],
-	[CMD_HELP, SpecificHelpCommand, [], CMD_HELP + " <command, no !>", "Returns help about the specified command"],
-	[CMD_PUB_SOCIAL, GetPubSocialCommand, [], CMD_PUB_SOCIAL, "Gets the info about the next pub social"],
-	[CMD_PUB_SOCIAL, SetPubSocialCommand, [ADMINS], CMD_PUB_SOCIAL + " <helpful and informative text>", "Sets the Pub Social info"],
-	[CMD_TELL, TellCommand, [], CMD_TELL + " <nickname> <message>", "Gives message to nickname when nickname next signs on"],
-	# Flat minecraft server related commands:
-	[CMD_MC_RESTART, MCRestartCommand, [FLAT_MEMBERS], CMD_MC_RESTART, "Restarts the Minecraft server instance, if it is running"],
-	[CMD_MC_STOP, MCStopCommand, [FLAT_MEMBERS], CMD_MC_STOP, "Stops the Minecraft server instance, if it is running"],
-	[CMD_MC_START, MCStartCommand, [FLAT_MEMBERS], CMD_MC_START, "Starts the Minecraft server, if it isn't running"],
-	[CMD_MC_STATUS, MCStatusCommand, [FLAT_MEMBERS], CMD_MC_STATUS, "Returns the status of the Minecraft server instance"],
-	[CMD_MC_CONSOLE, MCConsoleCommand, [FLAT_MEMBERS], CMD_MS_CONSOLE + " <command, as issued to the MC server console> ", 
-									"Issues the command directly to the MC server's StdIn. This might cause explosions. :)"]
-	]
+class ShaunBot:
+	# Commands to do:
+	# !insult <nick> <style>, where style can be any of... :D
+	# !committee - gives the sender committee contact info. This needs to be settable, so I need a committee group.
+	# !meet <nick> - adds <nick> to the bot's list of known people, if it isn't in there already.
 
-class ShaunBot [ircBot]:
+	# CMD, CLASS, GROUPS, USAGE, HELP
+	COMMANDS = [
+		[CMD_GET_ZTL, GetZTLCommand, [], CMD_GET_ZTL, "Gets the current Zombie Threat Level"],	
+		[CMD_SET_ZTL, SetZTLCommand, [ADMINS], "!threat+, !threat-, !threat N", "Sets the Zombie Threat Level"],
+		[CMD_NERF_SOCIAL, GetNerfSocialCommand, [], CMD_NERF_SOCIAL, "Gets the info about the next Nerf Social"],
+		[CMD_NERF_SOCIAL, SetNerfSocialCommand, [ADMINS], "!nerfsocial <helpful and informative text>", "Sets the Nerf Social info"],
+		[CMD_QUIT, QuitCommand, [ADMINS], "!quit <message>", "Makes the bot quit. Requires a MANUAL restart"],
+		[CMD_RESTART, RestartCommand, [ADMINS], "!restart <message>", "Restarts the bot"],
+		[CMD_BLARG, BlargCommand, [], "", ""],
+		[CMD_ABOUT, AboutCommand, [], CMD_ABOUT, "Returns info about the bot"],
+		[CMD_LOGGING, LoggingCommand, [], CMD_LOGGING, "Indicates whether or not the bot is currently logging"],
+		[CMD_START_LOGGING, StartLogCommand, [ADMINS], CMD_START_LOGGING, "Makes the bot log all messages it can see"],
+		[CMD_STOP_LOGGING, StopLogCommand, [ADMINS], CMD_STOP_LOGGING, "Stops the bot logging messages"],
+		[CMD_HELP, GeneralHelpCommand, [], CMD_HELP, "Returns a list of commands"],
+		[CMD_HELP, SpecificHelpCommand, [], CMD_HELP + " <command, no !>", "Returns help about the specified command"],
+		[CMD_PUB_SOCIAL, GetPubSocialCommand, [], CMD_PUB_SOCIAL, "Gets the info about the next pub social"],
+		[CMD_PUB_SOCIAL, SetPubSocialCommand, [ADMINS], CMD_PUB_SOCIAL + " <helpful and informative text>", "Sets the Pub Social info"],
+		[CMD_TELL, TellCommand, [], CMD_TELL + " <nickname> <message>", "Gives message to nickname when nickname next signs on"],
+		[CMD_MEET, MeetCommand, [], CMD_MEET + " <nickname>", "Prevents the bot from greeting people"],
+		# Flat minecraft server related commands:
+		[CMD_MC_RESTART, MCRestartCommand, [FLAT_MEMBERS], CMD_MC_RESTART, "Restarts the Minecraft server instance, if it is running"],
+		[CMD_MC_STOP, MCStopCommand, [FLAT_MEMBERS], CMD_MC_STOP, "Stops the Minecraft server instance, if it is running"],
+		[CMD_MC_START, MCStartCommand, [FLAT_MEMBERS], CMD_MC_START, "Starts the Minecraft server, if it isn't running"],
+		[CMD_MC_STATUS, MCStatusCommand, [FLAT_MEMBERS], CMD_MC_STATUS, "Returns the status of the Minecraft server instance"],
+		[CMD_MC_CONSOLE, MCConsoleCommand, [FLAT_MEMBERS], CMD_MC_CONSOLE + " <command, as issued to the MC server console> ", 
+										"Issues the command directly to the MC server's StdIn. This might cause explosions. :)"]
+		]
+	
+
+	def SayToChannel(self, Message):
+		self.say(CHANNEL, Message)	
+		
 	def Run(self):
 		# Do stuff:
 		pass
@@ -374,6 +333,8 @@ class ShaunBot [ircBot]:
 
 		
 	
-
+#############################################
+# Main program:
+ShaunBot = 
 
 
