@@ -27,6 +27,16 @@
 
 # Happy now?
 
+# Imports:
+from ircbotframe import ircBot
+from sys import exit, argv
+import subprocess # for restarting ourselves
+from time import asctime # for timestamps
+import random # for trolling Boff - I mean this.
+import minecraftserver # <OWL>
+from datetime import datetime, timedelta
+import threading # for regular backups
+
 # "Constants":
 # IRC:
 NETWORK = "irc.synirc.net"
@@ -115,6 +125,7 @@ CMD_START_LOGGING = "!startlog"
 CMD_STOP_LOGGING = "!stoplog"
 CMD_ABOUT = "!about"
 CMD_TELL = "!tell"
+CMD_MEET = "!meet"
 
 CMD_MC_RESTART = "!mcrestart"
 CMD_MC_STOP = "!mcstop"
@@ -129,16 +140,6 @@ MINECRAFT_BACKUP_INTERVAL = 10 * 60
 
 MINECRAFT_SERVER_COMMAND = "java -Xmx1024M -Xms1024M -jar " + MINECRAFT_DIR + "minecraft_server.jar nogui"
 MINECRAFT_BACKUP_COMMAND = "cp -u -r -f " + MINECRAFT_DIR + "* " + MINECRAFT_BACKUP_DIR
-
-# imports:
-from ircbotframe import ircBot
-from sys import exit, argv
-import subprocess # for restarting ourselves
-from time import asctime # for timestamps
-import random # for trolling Boff - I mean this.
-import minecraftserver # <OWL>
-from datetime import datetime, timedelta
-import threading # for regular backups
 
 # A few more useful constants:
 THIRTY_DAYS = timedelta.timedelta(days = 30)
@@ -533,7 +534,7 @@ class ShaunBot:
 		
 		return True
 
-	def About(self, Sender, ReplyTo, Headers, Message, Command):
+	def AboutCommand(self, Sender, ReplyTo, Headers, Message, Command):
 		# Always dump this in PM, because spam		
 		self.Say([Sender], ABOUT)
 		self.Say([Sender], "Version: " + VERSION)
@@ -541,7 +542,7 @@ class ShaunBot:
 
 		return True
 
-	def Tell(self, Sender, ReplyTo, Headers, Message, Command):
+	def TellCommand(self, Sender, ReplyTo, Headers, Message, Command):
 		Sections = Message.split(' ')
 		if len(Sections) < 3:
 			return False
@@ -565,15 +566,26 @@ class ShaunBot:
 		else:
 			self.Say([Sender], "You cannot send any more messages until old ones are delivered or expire!")
 
-		return True	
-			
+		return True
+
+	def	MeetCommand(self, Sender, ReplyTo, Headers, Message, Command):
+		Sections = Message.split(' ')
+		if len(Sections) < 2 or Sections[0] != CMD_MEET:
+			return False
+
+		# Expecting of form "!meet <nickname>", as the bot will have already met someone talking to it.
+		self.GetGroupOfNickname(Sections[1]) # This is all you need to do. ;)
+
+		return True			
 
 	# Commands to do:
 	# !insult <nick> <style>, where style can be any of... :D
 	# (Related: !addinsult <style> <text, with %n as nickname; !removeinsult <style> <enough text to uniquely ID it>)
 	# !committee - gives the sender committee contact info. This needs to be settable, so I need a committee group and a place to dump this info.
 	# !meet <nick> - adds <nick> to the bot's list of known people, if it isn't in there already.
+	
 	# CMD, CLASS, GROUPS, USAGE, HELP
+	# This is used do to some initialisation, although the groups value gets overridden by any state file info.
 	DEFAULT_COMMANDS = [
 		[CMD_GET_ZTL, GetZTLCommand, [], CMD_GET_ZTL, "Gets the current Zombie Threat Level"],	
 		[CMD_SET_ZTL, SetZTLCommand, [ADMINS], "!threat+, !threat-, !threat N", "Sets the Zombie Threat Level"],
@@ -600,7 +612,26 @@ class ShaunBot:
 		[CMD_MC_CONSOLE, MCConsoleCommand, [FLAT_MEMBERS], CMD_MC_CONSOLE + " <command, as issued to the MC server console> ", 
 										"Issues the command directly to the MC server's StdIn. This might cause explosions. :)"]
 		]
-		
+	
+	def WriteStateFile(self):
+
+	def ReadStateFile(self):	
+
+	def __init__(self, NickServPass)
+		# Much one time initialisation to default-default values.
+		# Then try to get state file info.
+		self.ZTL = 1
+		self.NerfSocial = "No one has set this yet!"
+		self.PubSocial = "No one has set this yet!"
+		self.LogFile = None
+		self.OfflineMessageList = OfflineMessageList()
+		self.Nickgroups = []
+		self.Commands = None
+		self.Bot = None
+
+		# Also, now set the NickServPass:
+		NICKSERV_PASS = NickServPass	
+
 	def Run(self):
 		# Do stuff:
 		pass
@@ -610,7 +641,11 @@ class ShaunBot:
 	
 #############################################
 # Main program:
-ShaunBotInst = ShaunBot()
+if len(argv) < 2:
+	print "Must supply NickServ Password on the command line for security reasons!"
+	exit(-1)
+
+ShaunBotInst = ShaunBot(argv[1])
 ShaunBotInst.Run()
 
 print "Quitting sanely..."
