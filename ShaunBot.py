@@ -331,7 +331,7 @@ class ShaunBot:
 			self.Bot.say(Dest, Message)
 	
 	def Log(self, Sender, Dest, Message):
-		LogStr = time.asctime() + "<" + From + "> " + To + ": " + Message		
+		LogStr = asctime() + "<" + From + "> " + To + ": " + Message		
 		print LogStr
 
 		if self.LogFile != None:
@@ -787,6 +787,7 @@ class ShaunBot:
 		self.Bot = None
 
 		# Also, now set the NickServPass:
+		global NICKSERV_PASS
 		NICKSERV_PASS = NickServPass	
 
 	# IRC binding implementations:
@@ -806,6 +807,7 @@ class ShaunBot:
 			self.Say([Msg.Dest], str(Msg))
 
 	def LagHandler(self):
+		global NICKSERV_PASS		
 		# Due to network latency, best to wait for
 		# numeric "376" (end of MOTD) before trying to join and ID with NickServ	
 		self.Bot.join(CHANNEL)
