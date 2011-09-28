@@ -638,7 +638,7 @@ class ShaunBot:
 			# All dumps of classes wrap strings in quotes.
 			# Quotes do not occur in the strings they are wrapping.
 			# All fields are thus separated by: ","	
-NickGroup=<timestamp>,<MasterNickname>,<Nickname 0>,<Nickname N>, etc
+
 			# Must dump nicknames before command groups and offline messages, or else fault on reading:
 			# Nick group format is: NickGroup=<timestamp>,<MasterNickname>,<Nickname 0>,<Nickname N>, etc
 			for NickGrp in self.Nickgroups:
@@ -722,7 +722,7 @@ NickGroup=<timestamp>,<MasterNickname>,<Nickname 0>,<Nickname N>, etc
 						print LineSections[1]
 						continue
 							
-					NewNickGrp = IRCNickGroup(Params[1])def OnPrivMsg(Bot, Sender, Headers, Message):					
+					NewNickGrp = IRCNickGroup(Params[1])
 					NewNickGrp.LastSeen = datetime.strptime(Params[0], TIMESTAMP_FORMAT)
 					for i in range(2, len(Params)):
 						NewNickGrp.AddNickname(Params[i])
@@ -744,10 +744,8 @@ NickGroup=<timestamp>,<MasterNickname>,<Nickname 0>,<Nickname N>, etc
 					self.OfflineMessageList.AddMessage(NewOfflineMessage)
 
 				elif LineSections[0] == "AccessGroup":
-					# Formprint time.asctime() + "<" + From + "> " + To + ": " + Message
+					# Format is: "AccessGroup=<Group Name>,<Nick group MasterNickname 0>,<Nick group MasterNickname N> 
 
-	if LogFile != None:
-			LogFile.write(time.asctime() + ': ' + From + ' to ' + To + ': ' + Message + '\n')at is: "AccessGroup=<Group Name>,<Nick group name 0>,<Nick group name N> 
 					Params = LineSections[1].split('","')
 
 					if len(Params) < 2:
@@ -762,11 +760,17 @@ NickGroup=<timestamp>,<MasterNickname>,<Nickname 0>,<Nickname N>, etc
 
 					self.Groups.append(NewAccessGroup)
 				#elif LineSections[0] == "CommandGroup": ...
+			except:
+				print "Something went epicly wrong during parsing the state file!"
+				print "Line:"
+				print Line
+				print "Attempting to continue..."
+				continue
 
 		print "Done parsing state file!\n" # Extra whitespace for legibility
 
 
-	def __init__(self, NickServPass)
+	def __init__(self, NickServPass):
 		# Much one time initialisation to default-default values.
 		# Then try to get state file info.
 		self.ZTL = 1
@@ -784,7 +788,8 @@ NickGroup=<timestamp>,<MasterNickname>,<Nickname 0>,<Nickname N>, etc
 
 	# IRC binding implementations:
 	def OnPrivMsg(self, Sender, ReplyTo, Headers, Message):
-		# New command dispatcher goes here.	
+		# New command dispatcher goes here.
+		pass # FIXME	
 
 	def OnJoin(self, Sender, Headers, Message):
 		Grp = self.GetGroupOfNickname(Sender)
@@ -843,7 +848,7 @@ def LagHandler(Bot, Sender, Headers, Message):
 
 	ShaunBotInst.LagHandler()	
 
-global BINDINGS = None
+global BINDINGS
 
 BINDINGS = [
 	["PRIVMSG", OnPrivMsg],
@@ -855,7 +860,7 @@ if len(argv) < 2:
 	print "Must supply NickServ Password on the command line for security reasons!"
 	exit(-1)
 
-global ShaunBotInst = None
+global ShaunBotInst
 
 ShaunBotInst = ShaunBot(argv[1]) # Nickserv pass
 ShaunBotInst.Run()
