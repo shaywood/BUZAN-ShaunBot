@@ -616,14 +616,14 @@ class ShaunBot:
 		[CMD_PUB_SOCIAL, GetPubSocialCommand, [], CMD_PUB_SOCIAL, "Gets the info about the next pub social"],
 		[CMD_PUB_SOCIAL, SetPubSocialCommand, [ADMINS], CMD_PUB_SOCIAL + " <helpful and informative text>", "Sets the Pub Social info"],
 		[CMD_TELL, TellCommand, [], CMD_TELL + " <nickname> <message>", "Gives message to nickname when nickname next signs on"],
-		[CMD_MEET, MeetCommand, [], CMD_MEET + " <nickname>", "Prevents the bot from greeting people"],
+		[CMD_MEET, MeetCommand, [], CMD_MEET + " <nickname>", "Prevents the bot from greeting people"]#,
 		# Flat minecraft server related commands:
-		[CMD_MC_RESTART, MCRestartCommand, [FLAT_MEMBERS], CMD_MC_RESTART, "Restarts the Minecraft server instance, if it is running"],
-		[CMD_MC_STOP, MCStopCommand, [FLAT_MEMBERS], CMD_MC_STOP, "Stops the Minecraft server instance, if it is running"],
-		[CMD_MC_START, MCStartCommand, [FLAT_MEMBERS], CMD_MC_START, "Starts the Minecraft server, if it isn't running"],
-		[CMD_MC_STATUS, MCStatusCommand, [FLAT_MEMBERS], CMD_MC_STATUS, "Returns the status of the Minecraft server instance"],
-		[CMD_MC_CONSOLE, MCConsoleCommand, [FLAT_MEMBERS], CMD_MC_CONSOLE + " <command, as issued to the MC server console> ", 
-										"Issues the command directly to the MC server's StdIn. This might cause explosions. :)"]
+		#[CMD_MC_RESTART, MCRestartCommand, [FLAT_MEMBERS], CMD_MC_RESTART, "Restarts the Minecraft server instance, if it is running"],
+		#[CMD_MC_STOP, MCStopCommand, [FLAT_MEMBERS], CMD_MC_STOP, "Stops the Minecraft server instance, if it is running"],
+		#[CMD_MC_START, MCStartCommand, [FLAT_MEMBERS], CMD_MC_START, "Starts the Minecraft server, if it isn't running"],
+		#[CMD_MC_STATUS, MCStatusCommand, [FLAT_MEMBERS], CMD_MC_STATUS, "Returns the status of the Minecraft server instance"],
+		#[CMD_MC_CONSOLE, MCConsoleCommand, [FLAT_MEMBERS], CMD_MC_CONSOLE + " <command, as issued to the MC server console> ", 
+		#								"Issues the command directly to the MC server's StdIn. This might cause explosions. :)"]
 		]
 	
 	def WriteStateFile(self):
