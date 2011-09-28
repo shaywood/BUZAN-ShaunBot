@@ -44,7 +44,7 @@ ABOUT = "I am ShaunBot, Zombie Robot Ghost" # Don't tell, for that matter.
 # Command for restarting self:
 COMMAND_FOR_SELF = "..\launcher.sh" # Shell script which pulls updates and then runs the bot again
 
-BACKUP_INTERVAL = 60 * 60 * 24 # once a day (value in seconds)
+BACKUP_INTERVAL = 60 * 60 # once an hour (value in seconds)
 
 # !tell command has a message limit, which is enforced for all nicks in a group.
 PER_NICK_MESSAGE_LIMIT = 20
@@ -264,18 +264,47 @@ class OfflineMessage:
 
 		S = "On " + self.TimeSent.strftime("%a, %d of %b %Y")
 		S = S + " at " + self.TimeSent.strftime("%H:%M")
-		S = S + " " + self.Sender + "said: " + self.Message
+		S = S + " " + self.Sender.GetMasterNickname() + "said: " + self.Message
 	
 		return S			
 	
-	def __init__(self, Sender, Dest, Message):
-		self.Sender = SenderNick
+	def __init__(self, SendersGrp, Dest, Message):
+		self.Sender = SendersGrp
 		self.Dest = DestNick
 		self.Message = Message
 		self.TimeSent = datetime.now()
 
 	def GetDestNick(self):
 		return self.Dest
+
+class OfflineMessageList:
+	def __init__(self):
+		self.Messages = []
+
+	def AddMessage(self, OfflineMsg):
+		""" Returns True/False based on success.
+			Adds OfflineMsg to the internal list IIF the sender is not breaking the message limit """
+		MsgCount = 0
+		for LocalMsg in self.Messages:
+			if OfflineMsg.Sender == LocalMsg.Sender:
+				MsgCount = MsgCount + 1
+
+		if MsgCount <= PER_NICK_MESSAGE_LIMIT:
+			self.Messages.append(OffLineMsg)
+			return True
+		else:
+			return False
+
+	def CheckForMessages(self, NickGrp):
+		""" Returns a list of OfflineMessage instances intended for NickGrp """
+		Result = []
+		
+		for Msg in self.Messages:
+			if Msg.Sender == NickGrp:
+				Result.append(Msg)
+				self.Messages.remove(Msg) # Remove that message.
+
+		return Result # Ya, rly.
 
 # Some final constants:
 # Default command listing.
@@ -304,6 +333,20 @@ class ShaunBot:
 	def OnAuthSuccess(Bot, Dest, Message):
 		# Sends Message to Dest:
 		Bot.say(Dest, Message)
+
+	# Nickname and NickGroup function(s):
+	def GetGroupOfNickname(self, Nickname):
+		""" Returns the IRCNickGroup associated with Nickname.
+			Creates that group if it does not exist """
+		# This needs to be faster, but that's hard. :(
+		for Grp in self.Nickgroups:
+			if Nickname in Grp:
+				return Grp
+		
+		Grp = IRCNickGroup(Nickname)		
+		self.Nickgroups.append(Grp)
+
+		return Grp
 
 	# Private functions:
 	def I_GetZTL(self):	
@@ -420,7 +463,11 @@ class ShaunBot:
 		# FIXME when we sort out the way commands will be held in memory...
 
 	def BlargCommand(self, Sender, ReplyTo, Headers, Message, Command):
-		self.Say([ReplyTo], "BLARG!")
+		self.Say([ReplyTo], "BLARG!")Dest = Sections[1]
+	
+	Message = ''	
+	for i in range(2, len(Sections)):
+		Message = Message + Sections[i] + ' '
 
 		return True
 
@@ -485,7 +532,41 @@ class ShaunBot:
 			self.Say([CHANNEL], "I am not currently logging!") 
 		
 		return True
-		
+
+	def About(self, Sender, ReplyTo, Headers, Message, Command):
+		# Always dump this in PM, because spam		
+		self.Say([Sender], ABOUT)
+		self.Say([Sender], "Version: " + VERSION)
+		self.Say([Sender], "Written by: " + AUTHORS)
+
+		return True
+
+	def Tell(self, Sender, ReplyTo, Headers, Message, Command):
+		Sections = Message.split(' ')
+		if len(Sections) < 3:
+			return False
+
+		if Sections[0] != CMD_TELL:
+			return False
+
+		# Create the offline message:
+		SendersGrp = self.GetGroupOfNickname(Sender)
+		Dest = Sections[1]
+	
+		Message = ''	
+		# I think there is a faster way to do this?		
+		for i in range(2, len(Sections)):
+			Message = Message + Sections[i] + ' '		
+
+		OfflineMsg = OfflineMessage(SendersGrp, Dest, Message)		
+
+		if self.OfflineMessageList.AddMessage(OfflineMsg):
+			self.Say([Sender], "Your message will be delivered the next time I see " + Dest)
+		else:
+			self.Say([Sender], "You cannot send any more messages until old ones are delivered or expire!")
+
+		return True	
+			
 
 	# Commands to do:
 	# !insult <nick> <style>, where style can be any of... :D
@@ -519,10 +600,6 @@ class ShaunBot:
 		[CMD_MC_CONSOLE, MCConsoleCommand, [FLAT_MEMBERS], CMD_MC_CONSOLE + " <command, as issued to the MC server console> ", 
 										"Issues the command directly to the MC server's StdIn. This might cause explosions. :)"]
 		]
-	
-
-	def SayToChannel(self, Message):
-		self.say(CHANNEL, Message)	
 		
 	def Run(self):
 		# Do stuff:
