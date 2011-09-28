@@ -142,7 +142,7 @@ MINECRAFT_SERVER_COMMAND = "java -Xmx1024M -Xms1024M -jar " + MINECRAFT_DIR + "m
 MINECRAFT_BACKUP_COMMAND = "cp -u -r -f " + MINECRAFT_DIR + "* " + MINECRAFT_BACKUP_DIR
 
 # A few more useful constants:
-THIRTY_DAYS = timedelta.timedelta(days = 30)
+THIRTY_DAYS = timedelta(days = 30)
 # This MUST NOT BE CHANGED!
 # Format eg: hh:mm:ss--dd/mm/yyyy
 TIMESTAMP_FORMAT = "%H:%M:%S--%d/%m/%Y"
