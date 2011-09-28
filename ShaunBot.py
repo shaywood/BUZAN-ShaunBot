@@ -299,6 +299,7 @@ class ShaunBot:
 
 	def OnAuthFailure(Bot):
 		# Do nothing. Useful as I have to specify it... :/
+		return
 
 	# Private functions:
 	def I_GetZTL(self):	
