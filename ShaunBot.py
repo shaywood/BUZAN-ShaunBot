@@ -469,9 +469,13 @@ class ShaunBot:
 	
 	def GeneralHelpCommand(self, Sender, ReplyTo, Headers, Message, Command):	
 		# FIXME when we sort out the way commands will be held in memory...
+		self.Say([Sender], "Sorry, this doesn't work yet")
+		return True
 
 	def SpecificHelpCommand(self, Sender, ReplyTo, Headers, Message, Command):
 		# FIXME when we sort out the way commands will be held in memory...
+		self.Say([Sender], "Sorry, this doesn't work yet")
+		return True
 
 	def BlargCommand(self, Sender, ReplyTo, Headers, Message, Command):
 		self.Say([ReplyTo], "BLARG!")Dest = Sections[1]
