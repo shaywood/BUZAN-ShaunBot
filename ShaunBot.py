@@ -143,6 +143,9 @@ MINECRAFT_BACKUP_COMMAND = "cp -u -r -f " + MINECRAFT_DIR + "* " + MINECRAFT_BAC
 
 # A few more useful constants:
 THIRTY_DAYS = timedelta.timedelta(days = 30)
+# This MUST NOT BE CHANGED!
+# Format eg: hh:mm:ss--dd/mm/yyyy
+TIMESTAMP_FORMAT = "%H:%M:%S--%d/%m/%Y"
 
 class IRCNickGroup:
 	""" Class to represent a NICK GROUP as defined above. """	
@@ -324,6 +327,13 @@ class ShaunBot:
 		for Dest in Dests:
 			self.Bot.say(Dest, Message)
 	
+	def Log(self, Sender, Dest, Message):
+		LogStr = time.asctime() + "<" + From + "> " + To + ": " + Message		
+		print LogStr
+
+		if self.LogFile != None:
+			self.LogFile.write(LogStr + '\n')	
+
 	def GetHelpMessage(Cmd):
 		return Cmd[CMD_USAGE] + " - " + Cmd[CMD_HELP_TEXT]
 
@@ -614,8 +624,147 @@ class ShaunBot:
 		]
 	
 	def WriteStateFile(self):
+		try:		
+			StateFile = open(STATE_FILE, 'w')
+		
+			StateFile.write("ZTL=" + str(self.Str) + '\n')
+			StateFile.write("NerfSocial=" + self.NerfSocial + '\n')
+			StateFile.write("PubSocial=" + self.PubSocial + '\n')
+	
+			# Now special info:
+			Logging = (self.LogFile != None)
+			StateFile.write("Logging=" + str(Logging) + '\n')
+			
+			# All dumps of classes wrap strings in quotes.
+			# Quotes do not occur in the strings they are wrapping.
+			# All fields are thus separated by: ","	
+NickGroup=<timestamp>,<MasterNickname>,<Nickname 0>,<Nickname N>, etc
+			# Must dump nicknames before command groups and offline messages, or else fault on reading:
+			# Nick group format is: NickGroup=<timestamp>,<MasterNickname>,<Nickname 0>,<Nickname N>, etc
+			for NickGrp in self.Nickgroups:
+				# Dump /all/ timestamps in format described by TIMESTAMP_FORMAT			
+				StateFile.write("NickGroup=\"" + NickGrp.LastSeen.strftime(TIMESTAMP_FORMAT) + '"')
+				StateFile.write(",\"" + NickGrp.GetMasterNickname() + '"')
+				for Nick in NickGrp.Nicks:
+					StateFile.write(",\"" + Nick + '"')
 
-	def ReadStateFile(self):	
+				StateFile.write('\n')
+					
+			# Now offline messages:
+			# Format is: OfflineMessage=<Sender's Group's MasterNickname>,<Dest nick>,<Message>,<Timestamp>
+			for Msg in self.OffLineMessageList.Messages:
+				StateFile.write("OfflineMessage=\"" + Msg.Sender.GetMasterNickname() + '"')
+				StateFile.write(",\"" + Msg.Dest + '"')
+				StateFile.write(",\"" + Msg.Message + '"')
+				StateFile.write(",\"" + Msg.TimeSent.strftime(TIMESTAMP_FORMAT)  + '"' + '\n')
+
+			# Now Groups:
+			# Format is: "AccessGroup=<Group Name>,<Nick group MasterNickname 0>,<Nick group MasterNickname N> 
+			for Grp in self.Groups:
+				StateFile.write("AccessGroup=\"" + Grp.GroupName + '"')
+				for NickGrp in Grp.NickGroups:
+					StateFile.write(",\"" + NickGrp.GetMasterNickname() + '"')
+
+				StateFile.write('\n')
+
+			# Now new command groupings:
+			# FIXME
+
+			StateFile.flush()
+			StateFile.close()
+		except:
+			print "Failed to write statefile!"		
+
+	def ReadStateFile(self):
+		try:
+			StateFile = open(STATE_FILE, 'r')
+			Lines = StateFile.readlines()
+			StateFile.close()
+		except:
+			print "Couldn't use state file, resorting to defaults!"
+			return
+		
+		print "Parsing state file..."		
+		for Line in Lines:
+			try:			
+				LineSections = Line.split('=')
+				
+				if len(LineSections) != 2:
+					print "Malformed line: " + Line
+					print "Skipping"
+					continue
+
+				if LineSections[0] == "ZTL":
+					self.ZTL = int(LineSections[1])
+
+				elif LineSections[0] == "NerfSocial":
+					self.NerfSocial = LineSections[1]
+
+				elif LineSections[1] == "PubSocial":
+					self.PubSocial = LineSections[1]
+
+				elif LineSections[0] == "Logging":
+					if LineSections[1] == "True":					
+						try:
+							self.LogFile = open(LOG_FILE, 'a')
+							print "Logging is initially ON!"
+						except:
+							print "Encountered an exception attempting to start logging, no longer logging!"
+					else:
+						print "Logging is initially OFF!"
+
+				elif LineSections[0] == "NickGroup":
+					# Format is: NickGroup=<timestamp>,<MasterNickname>,<Nickname 0>,<Nickname N>, etc
+					Params = LineSections[1].split('","')
+					# Params now corresponds to the order in the format line:
+					if len(Params) < 2:
+						print "Bad Nickgroup entry, skipping!"
+						print LineSections[1]
+						continue
+							
+					NewNickGrp = IRCNickGroup(Params[1])def OnPrivMsg(Bot, Sender, Headers, Message):					
+					NewNickGrp.LastSeen = datetime.strptime(Params[0], TIMESTAMP_FORMAT)
+					for i in range(2, len(Params)):
+						NewNickGrp.AddNickname(Params[i])
+
+					self.Nickgroups.append(NewNickGrp)
+
+				elif LineSections[0] == "OfflineMessage":
+					# Format is: OfflineMessage=<Sender's Group's MasterNickname>,<Dest nick>,<Message>,<Timestamp>
+					Params = LineSections[1].split('","')
+					
+					if len(Params) != 4:
+						print "Bad OfflineMessage entry, skipping!"
+						print LineSections[1]
+						continue
+					
+					NewOfflineMessage = OfflineMessage(self.GetGroupOfNickname(Params[0]), Params[1], Params[2])
+					NewOfflineMessage.TimeSent = datetime.strptime(Params[3], TIMESTAMP_FORMAT)
+
+					self.OfflineMessageList.AddMessage(NewOfflineMessage)
+
+				elif LineSections[0] == "AccessGroup":
+					# Formprint time.asctime() + "<" + From + "> " + To + ": " + Message
+
+	if LogFile != None:
+			LogFile.write(time.asctime() + ': ' + From + ' to ' + To + ': ' + Message + '\n')at is: "AccessGroup=<Group Name>,<Nick group name 0>,<Nick group name N> 
+					Params = LineSections[1].split('","')
+
+					if len(Params) < 2:
+						print "Bad AccessGroup entry, skipping!"					
+						print LineSections[1]
+						continue
+
+					NewAccessGroup = IRCAccessGroup(Params[0])
+
+					for i in range(1, len(Params)):
+						NewAccessGroup.AddNickgroup(self.GetGroupOfNickname(Params[i]))
+
+					self.Groups.append(NewAccessGroup)
+				#elif LineSections[0] == "CommandGroup": ...
+
+		print "Done parsing state file!\n" # Extra whitespace for legibility
+
 
 	def __init__(self, NickServPass)
 		# Much one time initialisation to default-default values.
@@ -626,26 +775,89 @@ class ShaunBot:
 		self.LogFile = None
 		self.OfflineMessageList = OfflineMessageList()
 		self.Nickgroups = []
-		self.Commands = None
+		self.Groups = [] # Of IRCAccessGroups
+		self.CommandList = None
 		self.Bot = None
 
 		# Also, now set the NickServPass:
 		NICKSERV_PASS = NickServPass	
 
-	def Run(self):
-		# Do stuff:
-		pass
-		
+	# IRC binding implementations:
+	def OnPrivMsg(self, Sender, ReplyTo, Headers, Message):
+		# New command dispatcher goes here.	
 
+	def OnJoin(self, Sender, Headers, Message):
+		Grp = self.GetGroupOfNickname(Sender)
+		if Grp == self.Nickgroups[len(self.Nickgroups) - 1]:
+			# This is the first time we have met this person:
+			self.Say([CHANNEL], "Hello " + Sender + "! Welcome to #BUZAN, the IRC channel for Bristol's own Zombie defence society! Type !help for !help")
+
+		# Deliver the message:		
+		Messages = self.OfflineMessageList.CheckForMessages(Grp)
+		for Msg in Messages:
+			self.Say([Msg.Dest], str(Msg))
+
+	def LagHandler(self):
+		# Due to network latency, best to wait for
+		# numeric "376" (end of MOTD) before trying to join and ID with NickServ	
+		Self.Bot.join(CHANNEL)
+		Self.Bot.say("NICKSERV", "identify " + NICKSERV_PASS)
+
+
+	# Main bot function:
+	def Run(self):
+		global BINDINGS
+	
+		bot = ircBot(NETWORK, PORT, NICKNAME, DESCRIPTION)
+		for Binding in BINDINGS:
+			bot.bind(Binding[0], Binding[1])
+    
+		bot.connect()
+		# Joining and IDing with NickServ handled in LagHandler
+		bot.run()
 		
 	
 #############################################
+# PUT IRC BINDINGS HERE
+def OnPrivMsg(Bot, Sender, Headers, Message):
+	global ShaunBotInst
+		
+	ReplyTo = Sender
+	# ... unless there is a channel inside Headers, in which case...
+	for s in Headers:
+		if s.startswith('#'):
+			ReplyTo = s	
+			break
+
+	ShaunBotInst.Log(Sender, ReplyTo, Message) 
+
+	ShaunBotInst.OnPrivMsg(Sender, ReplyTo, Headers, Message)
+
+def OnJoin(Bot, Sender, Headers, Message):
+	global ShaunBotInst
+	
+	ShaunBotInst.OnJoin(Sender, Headers, Message)
+
+def LagHandler(Bot, Sender, Headers, Message):
+	global ShaunBotInst
+
+	ShaunBotInst.LagHandler()	
+
+global BINDINGS = None
+
+BINDINGS = [
+	["PRIVMSG", OnPrivMsg],
+	["JOIN", OnJoin],
+	["376", LagHandler]]
+
 # Main program:
 if len(argv) < 2:
 	print "Must supply NickServ Password on the command line for security reasons!"
 	exit(-1)
 
-ShaunBotInst = ShaunBot(argv[1])
+global ShaunBotInst = None
+
+ShaunBotInst = ShaunBot(argv[1]) # Nickserv pass
 ShaunBotInst.Run()
 
 print "Quitting sanely..."
