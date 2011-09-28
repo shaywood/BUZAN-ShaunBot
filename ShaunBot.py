@@ -323,7 +323,7 @@ CMD_HELP_TEXT = 4
 
 class ShaunBot:
 	# Utility functions:
-	def Say(self, [Dests], Message):
+	def Say(self, Dests, Message):
 		for Dest in Dests:
 			self.Bot.say(Dest, Message)
 	
