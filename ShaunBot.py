@@ -107,6 +107,9 @@ STATE_FILE = 'state' # For saving data in between restarts.
 # The hardcoded ADMINS group which cannot be modified.
 # The hardcoded FLAT_MEMBERS group, because we use this to run our Minecraft Server.
 # (Are you honestly surprised?)
+ADMINS = ["CarrierII", "LaptopBoff", "Boff", "Spud"]
+
+FLAT_MEMBERS = ["CarrierII", "Lukeus_Maximus", "Molubdos"] # Add PikminDoctor when I know his nick is good. :)
 
 # Command names:
 CMD_GET_ZTL = "!threat"
