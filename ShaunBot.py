@@ -301,6 +301,10 @@ class ShaunBot:
 		# Do nothing. Useful as I have to specify it... :/
 		return
 
+	def OnAuthSuccess(Bot, Dest, Message):
+		# Sends Message to Dest:
+		Bot.say(Dest, Message)
+
 	# Private functions:
 	def I_GetZTL(self):	
 		# Returns correctly formatted ZTL string:
@@ -338,14 +342,14 @@ class ShaunBot:
 			return "Good news! Zombie Threat Level lowered to: " + ZOMBIE_THREAT_LEVELS[self.ZTL]
 
 	# Command implementations:	
-	def GetZTL(self, Sender, ReplyTo, Headers, Message, Command):		
+	def GetZTLCommand(self, Sender, ReplyTo, Headers, Message, Command):		
 		if Message == CMD_GET_ZTL:
 			self.Say([ReplyTo], self.I_GetZTL())
 			return True
 		else:
 			return False
 	
-	def SetZTL(self, Sender, ReplyTo, Headers, Message, Command):
+	def SetZTLCommand(self, Sender, ReplyTo, Headers, Message, Command):
 		# Changes to the ZTL get relayed to the channel, even if issued in private		
 		if Message == CMD_THREAT_PLUS:
 			self.Say([CHANNEL], self.I_SetZTL(self.ZTL + 1, False, Command))	
@@ -367,7 +371,7 @@ class ShaunBot:
 
 		return True
 	
-	def GetNerfSocial(self, Sender, ReplyTo, Headers, Message, Command):
+	def GetNerfSocialCommand(self, Sender, ReplyTo, Headers, Message, Command):
 		if Message == CMD_NERF_SOCIAL:
 			self.Say([ReplyTo], "The next nerf social will be: " + self.NerfSocial)	
 
@@ -375,7 +379,7 @@ class ShaunBot:
 		else:
 			return False
 
-	def SetNerfSocial(self, Sender, ReplyTo, Headers, Message, Command):	
+	def SetNerfSocialCommand(self, Sender, ReplyTo, Headers, Message, Command):	
 		if Message.startswith(CMD_NERF_SOCIAL):					
 			# is Message of the form !nerfsocial <string containing new nerf social>?
 			NewNerfSocial = Message[len(CMD_NERF_SOCIAL) + 1:]
@@ -389,7 +393,7 @@ class ShaunBot:
 			else:
 				return False
 
-	def GetPubSocial(self, Sender, ReplyTo, Headers, Message, Command):
+	def GetPubSocialCommand(self, Sender, ReplyTo, Headers, Message, Command):
 		if Message == CMD_PUB_SOCIAL:
 			self.Say([ReplyTo], "The next pub social will be: " + self.PubSocial)	
 
@@ -397,7 +401,7 @@ class ShaunBot:
 		else:
 			return False
 
-	def SetPubSocial(self, Sender, ReplyTo, Headers, Message, Command):	
+	def SetPubSocialCommand(self, Sender, ReplyTo, Headers, Message, Command):	
 		# Of form !nerfsocial <string containing new nerf social>?
 		NewPubSocial = Message[len(CMD_PUB_SOCIAL) + 1:]
 		if NewPubSocial != "":
@@ -408,23 +412,19 @@ class ShaunBot:
 			return True
 		else:
 			return False
-		
-
-	def OnHelpAuthSuccess(IRCBot, ShaunBotInst, Dest, HelpMessage):
-		ShaunBot.Say([Dest], HelpMessage)	
-
-	def GeneralHelp(self, Sender, ReplyTo, Headers, Message, Command):	
+	
+	def GeneralHelpCommand(self, Sender, ReplyTo, Headers, Message, Command):	
 		# FIXME when we sort out the way commands will be held in memory...
 
-	def SpecificHelp(self, Sender, ReplyTo, Headers, Message, Command):
+	def SpecificHelpCommand(self, Sender, ReplyTo, Headers, Message, Command):
 		# FIXME when we sort out the way commands will be held in memory...
 
-	def Blarg(self, Sender, ReplyTo, Headers, Message, Command):
+	def BlargCommand(self, Sender, ReplyTo, Headers, Message, Command):
 		self.Say([ReplyTo], "BLARG!")
 
 		return True
 
-	def Quit(self, Sender, ReplyTo, Headers, Message, Command):
+	def QuitCommand(self, Sender, ReplyTo, Headers, Message, Command):
 		QuitMsg = Message[len(CMD_QUIT) + 1:]	
 		
 		if QuitMsg == '':
@@ -437,7 +437,7 @@ class ShaunBot:
 
 		return True
 	
-	def Restart(self, Sender, ReplyTo, Headers, Message, Command):
+	def RestartCommand(self, Sender, ReplyTo, Headers, Message, Command):
 		QuitMsg = Message[len(CMD_RESTART) + 1:]
 		if QuitMsg == '':
 			QuitMsg = "Restarting because " + Sender + " told me to."
@@ -449,7 +449,7 @@ class ShaunBot:
 
 		return True
 
-	def Logging(self, Sender, ReplyTo, Headers, Message, Command):		
+	def LoggingCommand(self, Sender, ReplyTo, Headers, Message, Command):		
 		if (self.LogFile != None) and (not self.LogFile.closed):
 			# Logging is channel-level info:			
 			self.Say([CHANNEL], "I am currently logging this channel.")
@@ -458,7 +458,7 @@ class ShaunBot:
 
 		return True
 
-	def StartLog(self, Sender, ReplyTo, Headers, Message, Command):
+	def StartLogCommand(self, Sender, ReplyTo, Headers, Message, Command):
 		if self.LogFile == None:
 			try:
 				self.LogFile = open(LOG_FILE, 'a')
@@ -471,7 +471,7 @@ class ShaunBot:
 
 		return True
 		
-	def StopLog(self, Sender, ReplyTo, Headers, Message, Command):
+	def StopLogCommand(self, Sender, ReplyTo, Headers, Message, Command):
 		if self.LogFile != None:
 			try:
 				self.Say([CHANNEL], "Logging stopped by " + whoFrom)
