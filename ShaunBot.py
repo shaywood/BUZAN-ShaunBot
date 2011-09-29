@@ -756,7 +756,7 @@ class ShaunBot:
 						continue
 							
 					print "Creating a nickgroup for: " + Params[1]
-					NewNickGrp = IRCNickGroup(Params[1])
+					NewNickGrp = self.GetGroupOfNickname(Params[1])
 
 					NewNickGrp.LastSeen = datetime.strptime(Params[0], TIMESTAMP_FORMAT)
 					for i in range(2, len(Params)):
