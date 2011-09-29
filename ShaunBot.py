@@ -795,13 +795,23 @@ class ShaunBot:
 						continue
 
 					print "Creating an access group: " + Params[0]
-					NewAccessGroup = IRCAccessGroup(Params[0])
+					ActuallyCreateGroup = True
 
-					for i in range(1, len(Params)):
-						print "Adding nickgroup of " + Params[i] + " to it..."
-						NewAccessGroup.AddNickGroup(self.GetGroupOfNickname(Params[i]))						
+					for Group in self.Groups:
+						if Params[0] == Group.GroupName:
+							ActuallyCreateGroup = False
+							
+					if ActuallyCreateGroup:					
+						NewAccessGroup = IRCAccessGroup(Params[0])
 
-					self.Groups.append(NewAccessGroup)
+						for i in range(1, len(Params)):
+							print "Adding nickgroup of " + Params[i] + " to it..."
+							NewAccessGroup.AddNickGroup(self.GetGroupOfNickname(Params[i]))						
+										
+						self.Groups.append(NewAccessGroup)
+					else:
+						print "Group was already in the list"
+
 					print "Done. \n"
 				#elif LineSections[0] == "CommandGroup": ...
 			#except:
