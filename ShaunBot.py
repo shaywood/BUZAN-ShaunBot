@@ -691,7 +691,7 @@ class ShaunBot:
 			StateFile.flush()
 			StateFile.close()
 		#except:
-			print "Failed to write statefile!"		
+			#print "Failed to write statefile!"		
 
 	def ReadStateFile(self):
 		try:
@@ -796,12 +796,12 @@ class ShaunBot:
 					self.Groups.append(NewAccessGroup)
 					print "Done. \n"
 				#elif LineSections[0] == "CommandGroup": ...
-			except:
-				print "Something went epicly wrong during parsing the state file!"
-				print "Line:"
-				print Line
-				print "Attempting to continue..."
-				continue
+			#except:
+				#print "Something went epicly wrong during parsing the state file!"
+				#print "Line:"
+				#print Line
+				#print "Attempting to continue..."
+				#continue
 
 		print "Done parsing state file!\n" # Extra whitespace for legibility
 
