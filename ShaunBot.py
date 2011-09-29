@@ -277,7 +277,7 @@ class OfflineMessage:
 
 		S = "On " + self.TimeSent.strftime("%a, %d of %b %Y")
 		S = S + " at " + self.TimeSent.strftime("%H:%M")
-		S = S + " " + self.Sender.GetMasterNickname() + "said: " + self.Message
+		S = S + " " + self.Sender.GetMasterNickname() + " said: " + self.Message
 	
 		return S			
 	
