@@ -52,7 +52,7 @@ AUTHORS = "CarrierII, Lukeus_Maximus"
 ABOUT = "I am ShaunBot, Zombie Robot Ghost" # Don't tell, for that matter.
 
 # Command for restarting self:
-COMMAND_FOR_SELF = "relauncher.sh" # Shell script which pulls updates and then runs the bot again
+COMMAND_FOR_SELF = "./relauncher.sh" # Shell script which pulls updates and then runs the bot again
 
 BACKUP_INTERVAL = 60 * 60 # once an hour (value in seconds)
 
