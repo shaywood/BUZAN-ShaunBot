@@ -652,19 +652,19 @@ class ShaunBot:
 			
 			# All dumps of classes wrap strings in quotes.
 			# Quotes do not occur in the strings they are wrapping.
-			# All fields are thus separated by: ",", and have this at the very beginning/end as well.
+			# All fields are thus separated by: ',', with the contents of each field between "'s
 
 			# Must dump nicknames before command groups and offline messages, or else fault on reading:
 			# Nick group format is: NickGroup=<timestamp>,<MasterNickname>,<Nickname 0>,<Nickname N>, etc
 			for NickGrp in self.Nickgroups:
 				# Dump /all/ timestamps in format described by TIMESTAMP_FORMAT			
 				print "Dumping Nickgroup: " + NickGrp.GetMasterNickname()
-				StateFile.write('NickGroup=' + NickGrp.LastSeen.strftime(TIMESTAMP_FORMAT) + '"')
+				StateFile.write('NickGroup="' + NickGrp.LastSeen.strftime(TIMESTAMP_FORMAT) + '"')
 				StateFile.write(",\"" + NickGrp.GetMasterNickname() + '"')
 				for Nick in NickGrp.Nicks:
 					StateFile.write(",\"" + Nick + '"')
 
-				StateFile.write(',"\n')
+				StateFile.write('\n')
 					
 			# Now offline messages:
 			# Format is: OfflineMessage=<Sender's Group's MasterNickname>,<Dest nick>,<Message>,<Timestamp>
@@ -673,7 +673,7 @@ class ShaunBot:
 				StateFile.write("OfflineMessage=\"" + Msg.Sender.GetMasterNickname() + '"')
 				StateFile.write(",\"" + Msg.Dest + '"')
 				StateFile.write(",\"" + Msg.Message + '"')
-				StateFile.write(",\"" + Msg.TimeSent.strftime(TIMESTAMP_FORMAT)  + '","' + '\n')
+				StateFile.write(",\"" + Msg.TimeSent.strftime(TIMESTAMP_FORMAT)  + '"\n')
 
 			# Now Groups:
 			# Format is: "AccessGroup=<Group Name>,<Nick group MasterNickname 0>,<Nick group MasterNickname N> 
@@ -683,7 +683,7 @@ class ShaunBot:
 				for NickGrp in Grp.NickGroups:
 					StateFile.write(",\"" + NickGrp.GetMasterNickname() + '"')
 
-				StateFile.write(',"\n')
+				StateFile.write('\n')
 
 			# Now new command groupings:
 			# FIXME
@@ -742,7 +742,10 @@ class ShaunBot:
 
 				elif LineSections[0] == "NickGroup":
 					# Format is: NickGroup=<timestamp>,<MasterNickname>,<Nickname 0>,<Nickname N>, etc
-					Params = LineSections[1].split('","')
+					Params = LineSections[1].split(',')
+					for i in range(len(Params)):
+						Params[i] = Params[i][1:len(Params[i]) - 1] # Lose the first and last character.
+						
 					# Params now corresponds to the order in the format line:
 					if len(Params) < 2:
 						print "Bad Nickgroup entry, skipping!"
@@ -762,7 +765,9 @@ class ShaunBot:
 
 				elif LineSections[0] == "OfflineMessage":
 					# Format is: OfflineMessage=<Sender's Group's MasterNickname>,<Dest nick>,<Message>,<Timestamp>
-					Params = LineSections[1].split('","')
+					Params = LineSections[1].split(',')
+					for i in range(len(Params)):
+						Params[i] = Params[i][1:len(Params[i]) - 1] # Lose the first and last character.
 					
 					if len(Params) != 4:
 						print "Bad OfflineMessage entry, skipping!"
@@ -779,7 +784,9 @@ class ShaunBot:
 				elif LineSections[0] == "AccessGroup":
 					# Format is: "AccessGroup=<Group Name>,<Nick group MasterNickname 0>,<Nick group MasterNickname N> 
 
-					Params = LineSections[1].split('","')
+					Params = LineSections[1].split(',')
+					for i in range(len(Params)):
+						Params[i] = Params[i][1:len(Params[i]) - 1] # Lose the first and last character.
 
 					if len(Params) < 2:
 						print "Bad AccessGroup entry, skipping!"					
@@ -791,7 +798,7 @@ class ShaunBot:
 
 					for i in range(1, len(Params)):
 						print "Adding nickgroup of " + Params[i] + " to it..."
-						NewAccessGroup.AddNickgroup(self.GetGroupOfNickname(Params[i]))
+						NewAccessGroup.AddNickGroup(self.GetGroupOfNickname(Params[i]))
 
 					self.Groups.append(NewAccessGroup)
 					print "Done. \n"
