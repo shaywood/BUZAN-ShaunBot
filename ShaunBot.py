@@ -122,6 +122,7 @@ CMD_SET_NERF_SOCIAL = "!nerfsocial "
 CMD_GET_PUB_SOCIAL = "!pubsocial"
 CMD_SET_PUB_SOCIAL = "!pubsocial "
 CMD_HELP = "!help"
+CMD_SPECIFIC_HELP = "!help "
 CMD_BLARG = "!blarg"
 CMD_QUIT = "!quit"
 CMD_RESTART = "!restart"
@@ -614,8 +615,8 @@ class ShaunBot:
 	DEFAULT_COMMANDS = [
 		[CMD_GET_ZTL, GetZTLCommand, [], CMD_GET_ZTL, "Gets the current Zombie Threat Level"],	
 		[CMD_SET_ZTL, SetZTLCommand, ["ADMINS"], "!threat+, !threat-, !threat N", "Sets the Zombie Threat Level"],
-		[CMD_NERF_SOCIAL, GetNerfSocialCommand, [], CMD_NERF_SOCIAL, "Gets the info about the next Nerf Social"],
-		[CMD_NERF_SOCIAL, SetNerfSocialCommand, ["ADMINS"], "!nerfsocial <helpful and informative text>", "Sets the Nerf Social info"],
+		[CMD_GET_NERF_SOCIAL, GetNerfSocialCommand, [], CMD_NERF_SOCIAL, "Gets the info about the next Nerf Social"],
+		[CMD_SET_NERF_SOCIAL, SetNerfSocialCommand, ["ADMINS"], "!nerfsocial <helpful and informative text>", "Sets the Nerf Social info"],
 		[CMD_QUIT, QuitCommand, ["ADMINS"], "!quit <message>", "Makes the bot quit. Requires a MANUAL restart"],
 		[CMD_RESTART, RestartCommand, ["ADMINS"], "!restart <message>", "Restarts the bot"],
 		[CMD_BLARG, BlargCommand, [], "", ""],
@@ -624,9 +625,9 @@ class ShaunBot:
 		[CMD_START_LOGGING, StartLogCommand, ["ADMINS"], CMD_START_LOGGING, "Makes the bot log all messages it can see"],
 		[CMD_STOP_LOGGING, StopLogCommand, ["ADMINS"], CMD_STOP_LOGGING, "Stops the bot logging messages"],
 		[CMD_HELP, GeneralHelpCommand, [], CMD_HELP, "Returns a list of commands"],
-		[CMD_HELP, SpecificHelpCommand, [], CMD_HELP + " <command, no !>", "Returns help about the specified command"],
-		[CMD_PUB_SOCIAL, GetPubSocialCommand, [], CMD_PUB_SOCIAL, "Gets the info about the next pub social"],
-		[CMD_PUB_SOCIAL, SetPubSocialCommand, ["ADMINS"], CMD_PUB_SOCIAL + " <helpful and informative text>", "Sets the Pub Social info"],
+		[CMD_SPECIFIC_HELP, SpecificHelpCommand, [], CMD_HELP + " <command, no !>", "Returns help about the specified command"],
+		[CMD_GET_PUB_SOCIAL, GetPubSocialCommand, [], CMD_PUB_SOCIAL, "Gets the info about the next pub social"],
+		[CMD_SET_PUB_SOCIAL, SetPubSocialCommand, ["ADMINS"], CMD_PUB_SOCIAL + " <helpful and informative text>", "Sets the Pub Social info"],
 		[CMD_TELL, TellCommand, [], CMD_TELL + " <nickname> <message>", "Gives message to nickname when nickname next signs on"],
 		[CMD_MEET, MeetCommand, [], CMD_MEET + " <nickname>", "Prevents the bot from greeting people"]#,
 		# Flat minecraft server related commands:
