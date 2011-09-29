@@ -64,6 +64,9 @@ LOG_FILE = 'log'
 CMD_LOG_FILE = 'cmd_log'
 STATE_FILE = 'state' # For saving data in between restarts.
 
+# Misc:
+ZOMBIE_THREAT_LEVELS = ['Low', 'Guarded', 'Medium', 'High', "Contact Helena, that is your only hope now..."]
+
 # Command grouping:
 # Each PERSON has 1 or more NICKS. (For instance, I use CarrierII and EtherealII as a backup)
 # So give every PERSON a NICK GROUP. 
