@@ -761,7 +761,7 @@ class ShaunBot:
 					NewNickGrp.LastSeen = datetime.strptime(Params[0], TIMESTAMP_FORMAT)
 					for i in range(2, len(Params)):
 						#print "Adding " + Params[i] + " to that group..."						
-						if NewNickGrp.AddNickname(Params[i]):
+						NewNickGrp.AddNickname(Params[i])
 							#print "Actually added them."
 					
 					#print "Done. \n" # Legibility.
