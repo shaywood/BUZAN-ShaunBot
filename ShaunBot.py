@@ -638,18 +638,18 @@ class ShaunBot:
 		]
 	
 	def WriteStateFile(self):
-		#try:		
+		try:		
 			StateFile = open(STATE_FILE, 'w')
 		
-			print "Writing ZTL"			
+			#print "Writing ZTL"			
 			StateFile.write("ZTL=" + str(self.ZTL) + '\n')
-			print "Writing NerfSocial"
+			#print "Writing NerfSocial"
 			StateFile.write("NerfSocial=" + self.NerfSocial + '\n')
-			print "Writing PubSocial"
+			#print "Writing PubSocial"
 			StateFile.write("PubSocial=" + self.PubSocial + '\n')
 	
 			# Now special info:
-			print "Writing Logging"
+			#print "Writing Logging"
 			Logging = (self.LogFile != None)
 			StateFile.write("Logging=" + str(Logging) + '\n')
 			
@@ -661,7 +661,7 @@ class ShaunBot:
 			# Nick group format is: NickGroup=<timestamp>,<MasterNickname>,<Nickname 0>,<Nickname N>, etc
 			for NickGrp in self.Nickgroups:
 				# Dump /all/ timestamps in format described by TIMESTAMP_FORMAT			
-				print "Dumping Nickgroup: " + NickGrp.GetMasterNickname()
+				#print "Dumping Nickgroup: " + NickGrp.GetMasterNickname()
 				StateFile.write('NickGroup="' + NickGrp.LastSeen.strftime(TIMESTAMP_FORMAT) + '"')
 				StateFile.write(",\"" + NickGrp.GetMasterNickname() + '"')
 				for Nick in NickGrp.Nicks:
@@ -672,7 +672,7 @@ class ShaunBot:
 			# Now offline messages:
 			# Format is: OfflineMessage=<Sender's Group's MasterNickname>,<Dest nick>,<Message>,<Timestamp>
 			for Msg in self.OfflineMessageList.Messages:
-				print "Dumping OfflineMessage belonging to: " + Msg.Sender.GetMasterNickname()				
+				#print "Dumping OfflineMessage belonging to: " + Msg.Sender.GetMasterNickname()				
 				StateFile.write("OfflineMessage=\"" + Msg.Sender.GetMasterNickname() + '"')
 				StateFile.write(",\"" + Msg.Dest + '"')
 				StateFile.write(",\"" + Msg.Message + '"')
@@ -681,7 +681,7 @@ class ShaunBot:
 			# Now Groups:
 			# Format is: "AccessGroup=<Group Name>,<Nick group MasterNickname 0>,<Nick group MasterNickname N> 
 			for Grp in self.Groups:
-				print "Dumping AccessGroup: " + Grp.GroupName				
+				#print "Dumping AccessGroup: " + Grp.GroupName				
 				StateFile.write('AccessGroup="' + Grp.GroupName + '"')
 				for NickGrp in Grp.NickGroups:
 					StateFile.write(",\"" + NickGrp.GetMasterNickname() + '"')
@@ -693,8 +693,8 @@ class ShaunBot:
 
 			StateFile.flush()
 			StateFile.close()
-		#except:
-			#print "Failed to write statefile!"		
+		except:
+			print "Failed to write statefile!"		
 
 	def ReadStateFile(self):
 		try:
@@ -711,8 +711,8 @@ class ShaunBot:
 			return
 		
 		for Line in Lines:
-			#try:			
-				print "Parsing line: " + Line
+			try:			
+				#print "Parsing line: " + Line
 				
 				LineSections = Line.split('=')
 				
@@ -723,15 +723,15 @@ class ShaunBot:
 
 				if LineSections[0] == "ZTL":
 					self.ZTL = int(LineSections[1])
-					print "Set ZTL = " + str(self.ZTL)
+					#print "Set ZTL = " + str(self.ZTL)
 
 				elif LineSections[0] == "NerfSocial":
 					self.NerfSocial = LineSections[1].strip('\n')
-					print "Set NerfSocial = " + self.NerfSocial
+					#print "Set NerfSocial = " + self.NerfSocial
 
 				elif LineSections[0] == "PubSocial":
 					self.PubSocial = LineSections[1].strip('\n')
-					print "Set PubSocial = " + self.PubSocial
+					#print "Set PubSocial = " + self.PubSocial
 
 				elif LineSections[0] == "Logging":
 					if LineSections[1] == "True\n":					
@@ -760,11 +760,11 @@ class ShaunBot:
 
 					NewNickGrp.LastSeen = datetime.strptime(Params[0], TIMESTAMP_FORMAT)
 					for i in range(2, len(Params)):
-						print "Adding " + Params[i] + " to that group..."						
+						#print "Adding " + Params[i] + " to that group..."						
 						if NewNickGrp.AddNickname(Params[i]):
-							print "Actually added them."
+							#print "Actually added them."
 					
-					print "Done. \n" # Legibility.
+					#print "Done. \n" # Legibility.
 
 				elif LineSections[0] == "OfflineMessage":
 					# Format is: OfflineMessage=<Sender's Group's MasterNickname>,<Dest nick>,<Message>,<Timestamp>
@@ -777,12 +777,12 @@ class ShaunBot:
 						print LineSections[1]
 						continue
 					
-					print "Loading OfflineMessage from: " + Params[0]					
+					#print "Loading OfflineMessage from: " + Params[0]					
 					NewOfflineMessage = OfflineMessage(self.GetGroupOfNickname(Params[0]), Params[1], Params[2])
 					NewOfflineMessage.TimeSent = datetime.strptime(Params[3], TIMESTAMP_FORMAT) 
 
 					self.OfflineMessageList.AddMessage(NewOfflineMessage)
-					print "Done. \n"
+					#print "Done. \n"
 
 				elif LineSections[0] == "AccessGroup":
 					# Format is: "AccessGroup=<Group Name>,<Nick group MasterNickname 0>,<Nick group MasterNickname N> 
@@ -796,7 +796,7 @@ class ShaunBot:
 						print LineSections[1]
 						continue
 
-					print "Creating an access group: " + Params[0]
+					#print "Creating an access group: " + Params[0]
 					ActuallyCreateGroup = True
 
 					for Group in self.Groups:
@@ -807,24 +807,23 @@ class ShaunBot:
 						NewAccessGroup = IRCAccessGroup(Params[0])
 
 						for i in range(1, len(Params)):
-							print "Adding nickgroup of " + Params[i] + " to it..."
+							#print "Adding nickgroup of " + Params[i] + " to it..."
 							NewAccessGroup.AddNickGroup(self.GetGroupOfNickname(Params[i]))						
 										
 						self.Groups.append(NewAccessGroup)
-					else:
-						print "Group was already in the list"
+					#else:
+						#print "Group was already in the list"
 
-					print "Done. \n"
+					#print "Done. \n"
 				#elif LineSections[0] == "CommandGroup": ...
-			#except:
-				#print "Something went epicly wrong during parsing the state file!"
-				#print "Line:"
-				#print Line
-				#print "Attempting to continue..."
-				#continue
+			except:
+				print "Something went epicly wrong during parsing the state file!"
+				print "Line:"
+				print Line
+				print "Attempting to continue..."
+				continue
 
 		print "Done parsing state file!\n" # Extra whitespace for legibility
-
 
 	def __init__(self, NickServPass):
 		# Much one time initialisation to default-default values.
@@ -945,7 +944,6 @@ class ShaunBot:
 		# numeric "376" (end of MOTD) before trying to join and ID with NickServ	
 		self.Bot.join(CHANNEL)
 		self.Bot.say("NICKSERV", "identify " + NICKSERV_PASS)
-
 
 	# Main bot function:
 	def Run(self):
