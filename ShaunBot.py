@@ -413,11 +413,9 @@ class ShaunBot:
 
 	# Command implementations:	
 	def GetZTLCommand(self, Sender, ReplyTo, Headers, Message, Command):		
-		if Message == CMD_GET_ZTL:
-			self.Say([ReplyTo], self.I_GetZTL())
-			return True
-		else:
-			return False
+		self.Say([ReplyTo], self.I_GetZTL())
+
+		return True		
 	
 	def SetZTLCommand(self, Sender, ReplyTo, Headers, Message, Command):
 		# Changes to the ZTL get relayed to the channel, even if issued in private		
@@ -429,7 +427,7 @@ class ShaunBot:
 			# Should be of form !threat N, where N is an integer within the limits of ZOMBIE_THREAT_LEVELS
 			# Deal with it:		
 			Parts = Message.split(' ')
-			if Parts[0] == CMD_SET_ZTL:
+			if Parts[0] + ' ' == CMD_SET_ZTL:
 				try:
 					NewZTL = int(Parts[1])
 					self.Say([CHANNEL], self.I_SetZTL(NewZTL, True, Command))
@@ -442,38 +440,31 @@ class ShaunBot:
 		return True
 	
 	def GetNerfSocialCommand(self, Sender, ReplyTo, Headers, Message, Command):
-		if Message == CMD_NERF_SOCIAL:
-			self.Say([ReplyTo], "The next nerf social will be: " + self.NerfSocial)	
+		self.Say([ReplyTo], "The next nerf social will be: " + self.NerfSocial)	
 
+		return True
+		
+	def SetNerfSocialCommand(self, Sender, ReplyTo, Headers, Message, Command):	
+		# is Message of the form !nerfsocial <string containing new nerf social>?
+		NewNerfSocial = Message[len(CMD_GET_NERF_SOCIAL) + 1:]
+			
+		if NewNerfSocial != "":
+			self.NerfSocial = NewNerfSocial
+			# Nerf Social changes should be relayed to the channel:										
+			self.Say([CHANNEL], "The next Nerf Social will now be: " + self.NerfSocial)
+			
 			return True
 		else:
 			return False
-
-	def SetNerfSocialCommand(self, Sender, ReplyTo, Headers, Message, Command):	
-		if Message.startswith(CMD_NERF_SOCIAL):					
-			# is Message of the form !nerfsocial <string containing new nerf social>?
-			NewNerfSocial = Message[len(CMD_NERF_SOCIAL) + 1:]
-			
-			if NewNerfSocial != "":
-				self.NerfSocial = NewNerfSocial
-				# Nerf Social changes should be relayed to the channel:										
-				self.Say([CHANNEL], "The next Nerf Social will now be: " + self.NerfSocial)
-			
-				return True
-			else:
-				return False
 
 	def GetPubSocialCommand(self, Sender, ReplyTo, Headers, Message, Command):
-		if Message == CMD_PUB_SOCIAL:
-			self.Say([ReplyTo], "The next pub social will be: " + self.PubSocial)	
+		self.Say([ReplyTo], "The next pub social will be: " + self.PubSocial)	
 
-			return True
-		else:
-			return False
+		return True		
 
 	def SetPubSocialCommand(self, Sender, ReplyTo, Headers, Message, Command):	
-		# Of form !nerfsocial <string containing new nerf social>?
-		NewPubSocial = Message[len(CMD_PUB_SOCIAL) + 1:]
+		# Of form !pubsocial <string containing new pub social>?
+		NewPubSocial = Message[len(CMD_GET_PUB_SOCIAL) + 1:]
 		if NewPubSocial != "":
 			self.PubSocial = NewPubSocial
 			# Pub Social changes should be relayed to the channel:										
