@@ -708,7 +708,7 @@ class ShaunBot:
 			return
 		
 		for Line in Lines:
-			try:			
+			#try:			
 				print "Parsing line: " + Line
 				
 				LineSections = Line.split('=')
