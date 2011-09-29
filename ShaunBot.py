@@ -870,7 +870,7 @@ class ShaunBot:
 					# Sender must be in the commands access group:
 					if Sender in Cmd[CMD_GROUPS]:
 						# Sender must also be auth'd with nickserv:
-						self.Bot.identify(Sender, ShaunBot.OnCmdAuthSuccess, [self, Sender, ReplyTo, Headers, Message, Cmd], OnAuthFailure, [])
+						self.Bot.identify(Sender, ShaunBot.OnCmdAuthSuccess, [self, Sender, ReplyTo, Headers, Message, Cmd], ShaunBot.OnAuthFailure, [])
 						# Command execution is now async, due to network request. all done.
 				
 
