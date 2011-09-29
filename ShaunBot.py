@@ -948,6 +948,10 @@ class ShaunBot:
 		self.Bot.run()
 
 		self.WriteStateFile()
+
+		if self.RestartSelf:
+			print "Restarting self..."
+			subprocess.Popen(COMMAND_FOR_SELF, shell = True)
 		
 	
 #############################################
@@ -982,6 +986,8 @@ BINDINGS = [
 	["376", LagHandler]]
 
 # Main program:
+print "Welcome to ShaunBot - ZomPoc Tracker..."
+
 if len(argv) < 2:
 	print "Must supply NickServ Password on the command line for security reasons!"
 	exit(-1)
