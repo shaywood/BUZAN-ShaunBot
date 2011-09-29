@@ -931,10 +931,10 @@ class ShaunBot:
 		Grp = self.GetGroupOfNickname(Sender)
 		if Grp == self.NewestNickGroup:
 			# This is the first time we have met this person:
-			self.Say([CHANNEL], "Hello " + Sender + "! Welcome to #BUZAN, the IRC channel for Bristol's own Zombie defence society! Type !help for !help")
+			self.Say([CHANNEL], "Hello " + Sender + "! Welcome to #BUZAN, the IRC channel for Bristol's own Zombie defence society! Type !help for help")
 			self.NewestNickGroup = None
 
-		# Deliver the message:		
+		# Deliver message(s), if any:		
 		Messages = self.OfflineMessageList.CheckForMessages(Grp)
 		for Msg in Messages:
 			self.Say([Msg.Dest], str(Msg))
