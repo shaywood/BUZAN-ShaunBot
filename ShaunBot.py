@@ -659,7 +659,7 @@ class ShaunBot:
 			for NickGrp in self.Nickgroups:
 				# Dump /all/ timestamps in format described by TIMESTAMP_FORMAT			
 				print "Dumping Nickgroup: " + NickGrp.GetMasterNickname()
-				StateFile.write('NickGroup=","' + NickGrp.LastSeen.strftime(TIMESTAMP_FORMAT) + '"')
+				StateFile.write('NickGroup=' + NickGrp.LastSeen.strftime(TIMESTAMP_FORMAT) + '"')
 				StateFile.write(",\"" + NickGrp.GetMasterNickname() + '"')
 				for Nick in NickGrp.Nicks:
 					StateFile.write(",\"" + Nick + '"')
@@ -679,7 +679,7 @@ class ShaunBot:
 			# Format is: "AccessGroup=<Group Name>,<Nick group MasterNickname 0>,<Nick group MasterNickname N> 
 			for Grp in self.Groups:
 				print "Dumping AccessGroup: " + Grp.GroupName				
-				StateFile.write('AccessGroup=","' + Grp.GroupName + '"')
+				StateFile.write('AccessGroup="' + Grp.GroupName + '"')
 				for NickGrp in Grp.NickGroups:
 					StateFile.write(",\"" + NickGrp.GetMasterNickname() + '"')
 
