@@ -635,7 +635,7 @@ class ShaunBot:
 		]
 	
 	def WriteStateFile(self):
-		try:		
+		#try:		
 			StateFile = open(STATE_FILE, 'w')
 		
 			print "Writing ZTL"			
@@ -690,7 +690,7 @@ class ShaunBot:
 
 			StateFile.flush()
 			StateFile.close()
-		except:
+		#except:
 			print "Failed to write statefile!"		
 
 	def ReadStateFile(self):
@@ -709,6 +709,8 @@ class ShaunBot:
 		
 		for Line in Lines:
 			try:			
+				print "Parsing line: " + Line
+				
 				LineSections = Line.split('=')
 				
 				if len(LineSections) != 2:
