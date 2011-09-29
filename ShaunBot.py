@@ -502,7 +502,7 @@ class ShaunBot:
 		self.Bot.disconnect(QuitMsg)	
 
 		self.RestartSelf = False
-		Bot.stop() # Causes Bot.run() to return
+		self.Bot.stop() # Causes Bot.run() to return
 
 		return True
 	
@@ -857,10 +857,16 @@ class ShaunBot:
 		if Message.startswith('!'):
 			# Try to see if it is a command:
 			Words = Message.split(' ')
-			if len(Words) == 1:			
-				Cmd = self.CommandList.get(Words[0])
-			else:
-				Cmd = self.CommandList.get(Words[0] + ' ') # Space is required for some commands:
+			Cmd = self.CommandList.get(Words[0])
+			
+			# there are some commands (eg: Nerfsocial) that are different functions
+			# based on whether or not there was a space.
+			# Then there are commands like quit which is the same function, but with optional args, based on whether there was a space.
+			if len(Words) != 1:
+				# Might be an alternative command/form:
+				AltCmd = self.CommandList.get(Words[0] + ' ')
+				if (AltCmd != None) and (AltCmd != Cmd):
+					Cmd = AltCmd # There was a second, different function that should be called instead.			
 
 			if Cmd != None:
 				# Was a command, is Sender permitted to use it?
