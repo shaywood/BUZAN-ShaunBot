@@ -964,6 +964,17 @@ class ShaunBot:
 			print "Restarting self..."
 			subprocess.Popen(COMMAND_FOR_SELF, shell = True)
 		
+
+#############################################
+# Backup thread:
+def OnBackup():
+	global ShaunBotInst
+	
+	# Todo: make things expire.
+	ShaunBotInst.WriteStateFile()
+
+global BackupThread
+BackupThread = threading.Timer(BACKUP_INTERVAL, OnBackup)
 	
 #############################################
 # PUT IRC BINDINGS HERE
@@ -1004,8 +1015,14 @@ if len(argv) < 2:
 	exit(-1)
 
 global ShaunBotInst
+global BackupThread
 
 ShaunBotInst = ShaunBot(argv[1]) # Nickserv pass
+
+BackupThread.start()
+
 ShaunBotInst.Run()
+
+BackupThread = None
 
 print "Quitting sanely...\n"
