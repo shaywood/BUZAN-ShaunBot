@@ -763,8 +763,7 @@ class ShaunBot:
 						print "Adding " + Params[i] + " to that group..."						
 						if NewNickGrp.AddNickname(Params[i]):
 							print "Actually added them."
-
-					self.Nickgroups.append(NewNickGrp)
+					
 					print "Done. \n" # Legibility.
 
 				elif LineSections[0] == "OfflineMessage":
