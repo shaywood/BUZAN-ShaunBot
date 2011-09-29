@@ -723,15 +723,15 @@ class ShaunBot:
 					print "Set ZTL = " + str(self.ZTL)
 
 				elif LineSections[0] == "NerfSocial":
-					self.NerfSocial = LineSections[1]
+					self.NerfSocial = LineSections[1].strip('\n')
 					print "Set NerfSocial = " + self.NerfSocial
 
 				elif LineSections[0] == "PubSocial":
-					self.PubSocial = LineSections[1]
+					self.PubSocial = LineSections[1].strip('\n')
 					print "Set PubSocial = " + self.PubSocial
 
 				elif LineSections[0] == "Logging":
-					if LineSections[1] == "True":					
+					if LineSections[1] == "True\n":					
 						try:
 							self.LogFile = open(LOG_FILE, 'a')
 							print "Logging is initially ON!"
@@ -744,7 +744,7 @@ class ShaunBot:
 					# Format is: NickGroup=<timestamp>,<MasterNickname>,<Nickname 0>,<Nickname N>, etc
 					Params = LineSections[1].split(',')
 					for i in range(len(Params)):
-						Params[i] = Params[i][1:len(Params[i]) - 1] # Lose the first and last character.
+						Params[i] = Params[i].strip('\n').strip('"')
 						
 					# Params now corresponds to the order in the format line:
 					if len(Params) < 2:
@@ -758,7 +758,8 @@ class ShaunBot:
 					NewNickGrp.LastSeen = datetime.strptime(Params[0], TIMESTAMP_FORMAT)
 					for i in range(2, len(Params)):
 						print "Adding " + Params[i] + " to that group..."						
-						NewNickGrp.AddNickname(Params[i])
+						if NewNickGrp.AddNickname(Params[i]):
+							print "Actually added them."
 
 					self.Nickgroups.append(NewNickGrp)
 					print "Done. \n" # Legibility.
@@ -767,7 +768,7 @@ class ShaunBot:
 					# Format is: OfflineMessage=<Sender's Group's MasterNickname>,<Dest nick>,<Message>,<Timestamp>
 					Params = LineSections[1].split(',')
 					for i in range(len(Params)):
-						Params[i] = Params[i][1:len(Params[i]) - 1] # Lose the first and last character.
+						Params[i] = Params[i].strip('\n').strip('"')
 					
 					if len(Params) != 4:
 						print "Bad OfflineMessage entry, skipping!"
@@ -786,7 +787,7 @@ class ShaunBot:
 
 					Params = LineSections[1].split(',')
 					for i in range(len(Params)):
-						Params[i] = Params[i][1:len(Params[i]) - 1] # Lose the first and last character.
+						Params[i] = Params[i].strip('\n').strip('"')
 
 					if len(Params) < 2:
 						print "Bad AccessGroup entry, skipping!"					
@@ -798,7 +799,7 @@ class ShaunBot:
 
 					for i in range(1, len(Params)):
 						print "Adding nickgroup of " + Params[i] + " to it..."
-						NewAccessGroup.AddNickGroup(self.GetGroupOfNickname(Params[i]))
+						NewAccessGroup.AddNickGroup(self.GetGroupOfNickname(Params[i]))						
 
 					self.Groups.append(NewAccessGroup)
 					print "Done. \n"
