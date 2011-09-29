@@ -303,7 +303,7 @@ class OfflineMessageList:
 				MsgCount = MsgCount + 1
 
 		if MsgCount <= PER_NICK_MESSAGE_LIMIT:
-			self.Messages.append(OffLineMsg)
+			self.Messages.append(OfflineMsg)
 			return True
 		else:
 			return False
