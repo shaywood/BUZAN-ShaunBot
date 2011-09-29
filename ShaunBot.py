@@ -830,7 +830,7 @@ class ShaunBot:
 		# This way, dispatch is through hashing of text, and binary search.
 		ANYONE = CMDAccessGroup() # An empty group => anyone can use it
 
-		for DefaultCmd in DEFAULT_COMMANDS:
+		for DefaultCmd in ShaunBot.DEFAULT_COMMANDS:
 			NewCmdContainer = dict()
 			NewCmdContainer[CMD_CMD] = DefaultCmd[CMD_CMD] # Cmd's name
 			NewCmdContainer[CMD_FUNC] = DefaultCmd[CMD_FUNC]
