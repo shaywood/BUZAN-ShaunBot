@@ -668,7 +668,7 @@ class ShaunBot:
 					
 			# Now offline messages:
 			# Format is: OfflineMessage=<Sender's Group's MasterNickname>,<Dest nick>,<Message>,<Timestamp>
-			for Msg in self.OffLineMessageList.Messages:
+			for Msg in self.OfflineMessageList.Messages:
 				print "Dumping OfflineMessage belonging to: " + Msg.Sender.GetMasterNickname()				
 				StateFile.write("OfflineMessage=\"" + Msg.Sender.GetMasterNickname() + '"')
 				StateFile.write(",\"" + Msg.Dest + '"')
