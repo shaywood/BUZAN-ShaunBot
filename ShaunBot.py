@@ -638,11 +638,15 @@ class ShaunBot:
 		try:		
 			StateFile = open(STATE_FILE, 'w')
 		
+			print "Writing ZTL"			
 			StateFile.write("ZTL=" + str(self.Str) + '\n')
+			print "Writing NerfSocial"
 			StateFile.write("NerfSocial=" + self.NerfSocial + '\n')
+			print "Writing PubSocial"
 			StateFile.write("PubSocial=" + self.PubSocial + '\n')
 	
 			# Now special info:
+			print "Writing Logging"
 			Logging = (self.LogFile != None)
 			StateFile.write("Logging=" + str(Logging) + '\n')
 			
@@ -654,6 +658,7 @@ class ShaunBot:
 			# Nick group format is: NickGroup=<timestamp>,<MasterNickname>,<Nickname 0>,<Nickname N>, etc
 			for NickGrp in self.Nickgroups:
 				# Dump /all/ timestamps in format described by TIMESTAMP_FORMAT			
+				print "Dumping Nickgroup: " + NickGrp.GetMasterNickname()
 				StateFile.write("NickGroup=\"" + NickGrp.LastSeen.strftime(TIMESTAMP_FORMAT) + '"')
 				StateFile.write(",\"" + NickGrp.GetMasterNickname() + '"')
 				for Nick in NickGrp.Nicks:
@@ -664,6 +669,7 @@ class ShaunBot:
 			# Now offline messages:
 			# Format is: OfflineMessage=<Sender's Group's MasterNickname>,<Dest nick>,<Message>,<Timestamp>
 			for Msg in self.OffLineMessageList.Messages:
+				print "Dumping OfflineMessage belonging to: " + Msg.Sender.GetMasterNickname()				
 				StateFile.write("OfflineMessage=\"" + Msg.Sender.GetMasterNickname() + '"')
 				StateFile.write(",\"" + Msg.Dest + '"')
 				StateFile.write(",\"" + Msg.Message + '"')
@@ -672,6 +678,7 @@ class ShaunBot:
 			# Now Groups:
 			# Format is: "AccessGroup=<Group Name>,<Nick group MasterNickname 0>,<Nick group MasterNickname N> 
 			for Grp in self.Groups:
+				print "Dumping AccessGroup: " + Grp.GroupName				
 				StateFile.write("AccessGroup=\"" + Grp.GroupName + '"')
 				for NickGrp in Grp.NickGroups:
 					StateFile.write(",\"" + NickGrp.GetMasterNickname() + '"')
@@ -696,6 +703,10 @@ class ShaunBot:
 			return
 		
 		print "Parsing state file..."		
+		if len(Lines) == 0:
+			print "Empty state file, resorting to defaults!"
+			return
+		
 		for Line in Lines:
 			try:			
 				LineSections = Line.split('=')
@@ -707,12 +718,15 @@ class ShaunBot:
 
 				if LineSections[0] == "ZTL":
 					self.ZTL = int(LineSections[1])
+					print "Set ZTL = " + str(self.ZTL)
 
 				elif LineSections[0] == "NerfSocial":
 					self.NerfSocial = LineSections[1]
+					print "Set NerfSocial = " + self.NerfSocial
 
 				elif LineSections[1] == "PubSocial":
 					self.PubSocial = LineSections[1]
+					print "Set PubSocial = " + self.PubSocial
 
 				elif LineSections[0] == "LShaunBotInst.Log(Sender, ReplyTo, Message) ogging":
 					if LineSections[1] == "True":					
@@ -733,12 +747,16 @@ class ShaunBot:
 						print LineSections[1]
 						continue
 							
+					print "Creating a nickgroup for: " + Params[1]
 					NewNickGrp = IRCNickGroup(Params[1])
+
 					NewNickGrp.LastSeen = datetime.strptime(Params[0], TIMESTAMP_FORMAT)
 					for i in range(2, len(Params)):
+						print "Adding " + Params[i] + " to that group..."						
 						NewNickGrp.AddNickname(Params[i])
 
 					self.Nickgroups.append(NewNickGrp)
+					print "Done. \n" # Legibility.
 
 				elif LineSections[0] == "OfflineMessage":
 					# Format is: OfflineMessage=<Sender's Group's MasterNickname>,<Dest nick>,<Message>,<Timestamp>
@@ -749,10 +767,12 @@ class ShaunBot:
 						print LineSections[1]
 						continue
 					
+					print "Loading OfflineMessage from: " + Params[0]					
 					NewOfflineMessage = OfflineMessage(self.GetGroupOfNickname(Params[0]), Params[1], Params[2])
 					NewOfflineMessage.TimeSent = datetime.strptime(Params[3], TIMESTAMP_FORMAT)
 
 					self.OfflineMessageList.AddMessage(NewOfflineMessage)
+					print "Done. \n"
 
 				elif LineSections[0] == "AccessGroup":
 					# Format is: "AccessGroup=<Group Name>,<Nick group MasterNickname 0>,<Nick group MasterNickname N> 
@@ -764,12 +784,15 @@ class ShaunBot:
 						print LineSections[1]
 						continue
 
+					print "Creating an access group: " + Params[0]
 					NewAccessGroup = IRCAccessGroup(Params[0])
 
 					for i in range(1, len(Params)):
+						print "Adding nickgroup of " + Params[i] + " to it..."
 						NewAccessGroup.AddNickgroup(self.GetGroupOfNickname(Params[i]))
 
 					self.Groups.append(NewAccessGroup)
+					print "Done. \n"
 				#elif LineSections[0] == "CommandGroup": ...
 			except:
 				print "Something went epicly wrong during parsing the state file!"
