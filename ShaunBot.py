@@ -599,7 +599,7 @@ class ShaunBot:
 
 		# Expecting of form "!meet <nickname>", as the bot will have already met someone talking to it.
 		self.GetGroupOfNickname(Sections[1]) # This is all you need to do. ;)
-
+		
 		return True			
 
 	# Commands to do:
@@ -764,6 +764,7 @@ class ShaunBot:
 						NewNickGrp.AddNickname(Params[i])
 							#print "Actually added them."
 					
+					self.NewestNickGroup = None					
 					#print "Done. \n" # Legibility.
 
 				elif LineSections[0] == "OfflineMessage":
@@ -796,7 +797,7 @@ class ShaunBot:
 						print LineSections[1]
 						continue
 
-					#print "Creating an access group: " + Params[0]
+					print "Creating an access group: " + Params[0]
 					ActuallyCreateGroup = True
 
 					for Group in self.Groups:
