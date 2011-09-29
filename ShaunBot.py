@@ -327,6 +327,21 @@ CMD_GROUPS = 2
 CMD_USAGE = 3
 CMD_HELP_TEXT = 4
 
+def GetHelpMessage(Cmd):
+	return Cmd[CMD_USAGE] + " - " + Cmd[CMD_HELP_TEXT]
+
+def OnAuthFailure(Bot):
+	# Do nothing. Useful as I have to specify it... :/
+	return
+
+def OnAuthSuccess(Bot, Dest, Message):
+	# Sends Message to Dest:
+	Bot.say(Dest, Message)
+
+# IRC binding implementations:
+def OnCmdAuthSuccess(Bot, ShaunBotInst, Sender, ReplyTo, Headers, Message, Cmd):
+	Cmd[CMD_FUNC](ShaunBotInst, Sender, ReplyTo, Headers, Message, Cmd) # Call the function, all auth already done.	
+
 class ShaunBot:
 	# Utility functions:
 	def Say(self, Dests, Message):
@@ -339,17 +354,6 @@ class ShaunBot:
 
 		if self.LogFile != None:
 			self.LogFile.write(LogStr + '\n')	
-
-	def GetHelpMessage(Cmd):
-		return Cmd[CMD_USAGE] + " - " + Cmd[CMD_HELP_TEXT]
-
-	def OnAuthFailure(Bot):
-		# Do nothing. Useful as I have to specify it... :/
-		return
-
-	def OnAuthSuccess(Bot, Dest, Message):
-		# Sends Message to Dest:
-		Bot.say(Dest, Message)
 
 	# Nickname and NickGroup function(s):
 	def GetGroupOfNickname(self, Nickname):
@@ -847,10 +851,6 @@ class ShaunBot:
 		global NICKSERV_PASS
 		NICKSERV_PASS = NickServPass	
 
-	# IRC binding implementations:
-	def OnCmdAuthSuccess(Bot, ShaunBotInst, Sender, ReplyTo, Headers, Message, Cmd):
-		Cmd[CMD_FUNC](ShaunBotInst, Sender, ReplyTo, Headers, Message, Cmd) # Call the function, all auth already done.	
-
 	def OnPrivMsg(self, Sender, ReplyTo, Headers, Message):
 		self.Log(Sender, ReplyTo, Message) 
 		
@@ -870,7 +870,7 @@ class ShaunBot:
 					# Sender must be in the commands access group:
 					if Sender in Cmd[CMD_GROUPS]:
 						# Sender must also be auth'd with nickserv:
-						self.Bot.identify(Sender, ShaunBot.OnCmdAuthSuccess, [self, Sender, ReplyTo, Headers, Message, Cmd], ShaunBot.OnAuthFailure, [])
+						self.Bot.identify(Sender, OnCmdAuthSuccess, [self, Sender, ReplyTo, Headers, Message, Cmd], OnAuthFailure, [])
 						# Command execution is now async, due to network request. all done.
 				
 
