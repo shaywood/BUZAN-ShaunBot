@@ -726,11 +726,11 @@ class ShaunBot:
 					self.NerfSocial = LineSections[1]
 					print "Set NerfSocial = " + self.NerfSocial
 
-				elif LineSections[1] == "PubSocial":
+				elif LineSections[0] == "PubSocial":
 					self.PubSocial = LineSections[1]
 					print "Set PubSocial = " + self.PubSocial
 
-				elif LineSections[0] == "LShaunBotInst.Log(Sender, ReplyTo, Message) ogging":
+				elif LineSections[0] == "Logging":
 					if LineSections[1] == "True":					
 						try:
 							self.LogFile = open(LOG_FILE, 'a')
