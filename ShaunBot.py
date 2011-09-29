@@ -107,18 +107,20 @@ STATE_FILE = 'state' # For saving data in between restarts.
 # The hardcoded ADMINS group which cannot be modified.
 # The hardcoded FLAT_MEMBERS group, because we use this to run our Minecraft Server.
 # (Are you honestly surprised?)
-ADMINS = ["CarrierII", "LaptopBoff", "Boff", "Spud"]
+ADMINS = [["CarrierII"], ["LaptopBoff", "Boff"], ["Spud"]]
 
-FLAT_MEMBERS = ["CarrierII", "Lukeus_Maximus", "Molubdos"] # Add PikminDoctor when I know his nick is good. :)
+FLAT_MEMBERS = [["CarrierII"], ["Lukeus_Maximus"], ["Molubdos"]] # Add PikminDoctor when I know his nick is good. :)
 
 # Command names:
 CMD_GET_ZTL = "!threat"
-CMD_SET_ZTL = CMD_GET_ZTL # yes, really.
+CMD_SET_ZTL = "!threat " # yes, really. That space is deliberate.
 CMD_THREAT_PLUS = "!threat+"
 CMD_THREAT_MINUS = "!threat-"
 
-CMD_NERF_SOCIAL = "!nerfsocial"
-CMD_PUB_SOCIAL = "!pubsocial"
+CMD_GET_NERF_SOCIAL = "!nerfsocial"
+CMD_SET_NERF_SOCIAL = "!nerfsocial "
+CMD_GET_PUB_SOCIAL = "!pubsocial"
+CMD_SET_PUB_SOCIAL = "!pubsocial "
 CMD_HELP = "!help"
 CMD_BLARG = "!blarg"
 CMD_QUIT = "!quit"
@@ -363,6 +365,15 @@ class ShaunBot:
 
 		return Grp
 
+	def GetAccessGroup(self, GroupName):
+		""" Gets the IRCAccessGroup named in the parameter.
+			if it does not exist, None is returned """
+		for Grp in self.Groups:
+			if Grp.GroupName == GroupName:
+				return Grp
+
+		return None
+
 	# Private functions:
 	def I_GetZTL(self):	
 		# Returns correctly formatted ZTL string:
@@ -602,20 +613,20 @@ class ShaunBot:
 	# This is used do to some initialisation, although the groups value gets overridden by any state file info.
 	DEFAULT_COMMANDS = [
 		[CMD_GET_ZTL, GetZTLCommand, [], CMD_GET_ZTL, "Gets the current Zombie Threat Level"],	
-		[CMD_SET_ZTL, SetZTLCommand, [ADMINS], "!threat+, !threat-, !threat N", "Sets the Zombie Threat Level"],
+		[CMD_SET_ZTL, SetZTLCommand, ["ADMINS"], "!threat+, !threat-, !threat N", "Sets the Zombie Threat Level"],
 		[CMD_NERF_SOCIAL, GetNerfSocialCommand, [], CMD_NERF_SOCIAL, "Gets the info about the next Nerf Social"],
-		[CMD_NERF_SOCIAL, SetNerfSocialCommand, [ADMINS], "!nerfsocial <helpful and informative text>", "Sets the Nerf Social info"],
-		[CMD_QUIT, QuitCommand, [ADMINS], "!quit <message>", "Makes the bot quit. Requires a MANUAL restart"],
-		[CMD_RESTART, RestartCommand, [ADMINS], "!restart <message>", "Restarts the bot"],
+		[CMD_NERF_SOCIAL, SetNerfSocialCommand, ["ADMINS"], "!nerfsocial <helpful and informative text>", "Sets the Nerf Social info"],
+		[CMD_QUIT, QuitCommand, ["ADMINS"], "!quit <message>", "Makes the bot quit. Requires a MANUAL restart"],
+		[CMD_RESTART, RestartCommand, ["ADMINS"], "!restart <message>", "Restarts the bot"],
 		[CMD_BLARG, BlargCommand, [], "", ""],
 		[CMD_ABOUT, AboutCommand, [], CMD_ABOUT, "Returns info about the bot"],
 		[CMD_LOGGING, LoggingCommand, [], CMD_LOGGING, "Indicates whether or not the bot is currently logging"],
-		[CMD_START_LOGGING, StartLogCommand, [ADMINS], CMD_START_LOGGING, "Makes the bot log all messages it can see"],
-		[CMD_STOP_LOGGING, StopLogCommand, [ADMINS], CMD_STOP_LOGGING, "Stops the bot logging messages"],
+		[CMD_START_LOGGING, StartLogCommand, ["ADMINS"], CMD_START_LOGGING, "Makes the bot log all messages it can see"],
+		[CMD_STOP_LOGGING, StopLogCommand, ["ADMINS"], CMD_STOP_LOGGING, "Stops the bot logging messages"],
 		[CMD_HELP, GeneralHelpCommand, [], CMD_HELP, "Returns a list of commands"],
 		[CMD_HELP, SpecificHelpCommand, [], CMD_HELP + " <command, no !>", "Returns help about the specified command"],
 		[CMD_PUB_SOCIAL, GetPubSocialCommand, [], CMD_PUB_SOCIAL, "Gets the info about the next pub social"],
-		[CMD_PUB_SOCIAL, SetPubSocialCommand, [ADMINS], CMD_PUB_SOCIAL + " <helpful and informative text>", "Sets the Pub Social info"],
+		[CMD_PUB_SOCIAL, SetPubSocialCommand, ["ADMINS"], CMD_PUB_SOCIAL + " <helpful and informative text>", "Sets the Pub Social info"],
 		[CMD_TELL, TellCommand, [], CMD_TELL + " <nickname> <message>", "Gives message to nickname when nickname next signs on"],
 		[CMD_MEET, MeetCommand, [], CMD_MEET + " <nickname>", "Prevents the bot from greeting people"]#,
 		# Flat minecraft server related commands:
@@ -707,7 +718,7 @@ class ShaunBot:
 				elif LineSections[1] == "PubSocial":
 					self.PubSocial = LineSections[1]
 
-				elif LineSections[0] == "Logging":
+				elif LineSections[0] == "LShaunBotInst.Log(Sender, ReplyTo, Message) ogging":
 					if LineSections[1] == "True":					
 						try:
 							self.LogFile = open(LOG_FILE, 'a')
@@ -785,7 +796,55 @@ class ShaunBot:
 		self.Nickgroups = []
 		self.NewestNickGroup = None
 		self.Groups = [] # Of IRCAccessGroups
-		self.CommandList = None
+		self.CommandList = dict()
+
+		# Setup some of the defaults:
+		# Need to create the two special groups, ADMINS and FLAT_MEMBERS
+		# Ensure we know who these people are:		
+		for Nicknames in ADMINS:
+			Grp = self.GetGroupOfNickname(Nicknames[0])			
+			for Nick in Nicknames:
+				Grp.AddNickname(Nick) # Duplicates are prevented by this routine
+
+		for Nicknames in FLAT_MEMBERS:
+			Grp = self.GetGroupOfNickname(Nicknames[0])			
+			for Nick in Nicknames:
+				Grp.AddNickname(Nick)
+
+		# Now make the two IRCAccessGroups:
+		AdminGrp = IRCAccessGroup()
+		for Nicknames in ADMINS:
+			AdminGrp.AddNickGroup(self.GetGroupOfNickname(Nicknames[0]))
+
+		self.Groups.append(AdminGrp)
+
+		FlatMembersGrp = IRCAccessGroup()
+		for Nicknames in FLAT_MEMBERS:
+			FlatMembersGrp.AddNickGroup(self.GetGroupOfNickname(Nicknames[0]))		
+
+		self.Groups.append(FlatMembersGrp)
+
+		# Have to fill up CommandList to contain
+		# dict's containing all the fields of a command.
+		# This way, dispatch is through hashing of text, and binary search.
+		ANYONE = CMDAccessGroup() # An empty group => anyone can use it
+
+		for DefaultCmd in COMMANDS:
+			NewCmdContainer = dict()
+			NewCmdContainer[CMD_CMD] = DefaultCmd[CMD_CMD] # Cmd's name
+			NewCmdContainer[CMD_FUNC] = DefaultCmd[CMD_FUNC]
+			NewCmdContainer[CMD_USAGE] = DefaultCmd[CMD_USAGE]
+			NewCmdContainer[CMD_HELP_TEXT] = DefaultCmd[CMD_HELP_TEXT]
+			if len(DefaultCmd[CMD_GROUPS]) == 0:
+				NewCmdContainer[CMD_GROUPS] = ANYONE
+			else:			
+				NewCmdContainer[CMD_GROUPS] = CMDAccessGroup()
+				for GroupName in DefaultCmd[CMD_GROUPS]:			
+					NewCmdContainer[CMD_GROUPS].AddAccessGroup(self.GetAccessGroup(GroupName))
+
+			# Now add the NewCmdContainer into self.CommandList:
+			self.CommandList[NewCmdContainer[CMD_CMD]] = NewCmdContainer
+		
 		self.Bot = None	
 
 		# Also, now set the NickServPass:
@@ -793,9 +852,26 @@ class ShaunBot:
 		NICKSERV_PASS = NickServPass	
 
 	# IRC binding implementations:
+	def OnCmdAuthSuccess(Bot, Sender, ReplyTo, Headers, Message, Cmd):
+		Cmd[CMD_FUNC](Sender, ReplyTo, Headers, Message, Cmd) # Call the function, all auth already done.	
+
 	def OnPrivMsg(self, Sender, ReplyTo, Headers, Message):
-		# New command dispatcher goes here.
-		pass # FIXME	
+		self.Log(Sender, ReplyTo, Message) 
+		
+		if Message.startswith('!'):
+			# Try to see if it is a command:
+			Cmd = self.CommandList.get(Message.split(' ')[0])
+			if Cmd != None:
+				# Was a command, is Sender permitted to use it?
+				if Cmd[CMD_GROUPS].AllowAnyone():
+					Cmd[CMD_FUNC](Sender, ReplyTo, Headers, Message, Cmd)
+				else:
+					# Sender must be in the commands access group:
+					if Sender in Cmd[CMD_GROUPS]:
+						# Sender must also be auth'd with nickserv:
+						self.Bot.identify(Sender, OnCmdAuthSuccess, [Sender, ReplyTo, Headers, Message, Cmd], OnAuthFailure, [])
+						# Command execution is now async, due to network request. all done.
+				
 
 	def OnJoin(self, Sender, Headers, Message):
 		Grp = self.GetGroupOfNickname(Sender)
@@ -836,13 +912,11 @@ def OnPrivMsg(Bot, Sender, Headers, Message):
 	global ShaunBotInst
 		
 	ReplyTo = Sender
-	# ... unless there is a channel inside Headers, in which case...
+	# ... unless there is a channel inside Headers, in which case:
 	for s in Headers:
 		if s.startswith('#'):
 			ReplyTo = s	
 			break
-
-	ShaunBotInst.Log(Sender, ReplyTo, Message) 
 
 	ShaunBotInst.OnPrivMsg(Sender, ReplyTo, Headers, Message)
 
