@@ -851,6 +851,8 @@ class ShaunBot:
 		global NICKSERV_PASS
 		NICKSERV_PASS = NickServPass	
 
+		self.ReadStateFile()
+
 	def OnPrivMsg(self, Sender, ReplyTo, Headers, Message):
 		self.Log(Sender, ReplyTo, Message) 
 		
@@ -911,6 +913,8 @@ class ShaunBot:
 		self.Bot.connect()
 		# Joining and IDing with NickServ handled in LagHandler
 		self.Bot.run()
+
+		self.WriteStateFile()
 		
 	
 #############################################
