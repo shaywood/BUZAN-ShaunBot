@@ -853,8 +853,8 @@ class ShaunBot:
 		NICKSERV_PASS = NickServPass	
 
 	# IRC binding implementations:
-	def OnCmdAuthSuccess(Bot, Sender, ReplyTo, Headers, Message, Cmd):
-		Cmd[CMD_FUNC](Sender, ReplyTo, Headers, Message, Cmd) # Call the function, all auth already done.	
+	def OnCmdAuthSuccess(Bot, ShaunBotInst, Sender, ReplyTo, Headers, Message, Cmd):
+		Cmd[CMD_FUNC](ShaunBotInst, Sender, ReplyTo, Headers, Message, Cmd) # Call the function, all auth already done.	
 
 	def OnPrivMsg(self, Sender, ReplyTo, Headers, Message):
 		self.Log(Sender, ReplyTo, Message) 
@@ -865,12 +865,12 @@ class ShaunBot:
 			if Cmd != None:
 				# Was a command, is Sender permitted to use it?
 				if Cmd[CMD_GROUPS].AllowAnyone():
-					Cmd[CMD_FUNC](Sender, ReplyTo, Headers, Message, Cmd)
+					Cmd[CMD_FUNC](self, Sender, ReplyTo, Headers, Message, Cmd)
 				else:
 					# Sender must be in the commands access group:
 					if Sender in Cmd[CMD_GROUPS]:
 						# Sender must also be auth'd with nickserv:
-						self.Bot.identify(Sender, OnCmdAuthSuccess, [Sender, ReplyTo, Headers, Message, Cmd], OnAuthFailure, [])
+						self.Bot.identify(Sender, OnCmdAuthSuccess, [self, Sender, ReplyTo, Headers, Message, Cmd], OnAuthFailure, [])
 						# Command execution is now async, due to network request. all done.
 				
 
