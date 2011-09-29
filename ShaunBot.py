@@ -283,7 +283,7 @@ class OfflineMessage:
 	
 	def __init__(self, SendersGrp, Dest, Message):
 		self.Sender = SendersGrp
-		self.Dest = DestNick
+		self.Dest = Dest
 		self.Message = Message
 		self.TimeSent = datetime.now()
 
