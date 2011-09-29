@@ -813,13 +813,13 @@ class ShaunBot:
 				Grp.AddNickname(Nick)
 
 		# Now make the two IRCAccessGroups:
-		AdminGrp = IRCAccessGroup()
+		AdminGrp = IRCAccessGroup("ADMINS")
 		for Nicknames in ADMINS:
 			AdminGrp.AddNickGroup(self.GetGroupOfNickname(Nicknames[0]))
 
 		self.Groups.append(AdminGrp)
 
-		FlatMembersGrp = IRCAccessGroup()
+		FlatMembersGrp = IRCAccessGroup("FLAT_MEMBERS")
 		for Nicknames in FLAT_MEMBERS:
 			FlatMembersGrp.AddNickGroup(self.GetGroupOfNickname(Nicknames[0]))		
 
