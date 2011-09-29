@@ -639,7 +639,7 @@ class ShaunBot:
 			StateFile = open(STATE_FILE, 'w')
 		
 			print "Writing ZTL"			
-			StateFile.write("ZTL=" + str(self.Str) + '\n')
+			StateFile.write("ZTL=" + str(self.ZTL) + '\n')
 			print "Writing NerfSocial"
 			StateFile.write("NerfSocial=" + self.NerfSocial + '\n')
 			print "Writing PubSocial"
