@@ -652,19 +652,19 @@ class ShaunBot:
 			
 			# All dumps of classes wrap strings in quotes.
 			# Quotes do not occur in the strings they are wrapping.
-			# All fields are thus separated by: ","	
+			# All fields are thus separated by: ",", and have this at the very beginning/end as well.
 
 			# Must dump nicknames before command groups and offline messages, or else fault on reading:
 			# Nick group format is: NickGroup=<timestamp>,<MasterNickname>,<Nickname 0>,<Nickname N>, etc
 			for NickGrp in self.Nickgroups:
 				# Dump /all/ timestamps in format described by TIMESTAMP_FORMAT			
 				print "Dumping Nickgroup: " + NickGrp.GetMasterNickname()
-				StateFile.write("NickGroup=\"" + NickGrp.LastSeen.strftime(TIMESTAMP_FORMAT) + '"')
+				StateFile.write('NickGroup=","' + NickGrp.LastSeen.strftime(TIMESTAMP_FORMAT) + '"')
 				StateFile.write(",\"" + NickGrp.GetMasterNickname() + '"')
 				for Nick in NickGrp.Nicks:
 					StateFile.write(",\"" + Nick + '"')
 
-				StateFile.write('\n')
+				StateFile.write(',"\n')
 					
 			# Now offline messages:
 			# Format is: OfflineMessage=<Sender's Group's MasterNickname>,<Dest nick>,<Message>,<Timestamp>
@@ -673,17 +673,17 @@ class ShaunBot:
 				StateFile.write("OfflineMessage=\"" + Msg.Sender.GetMasterNickname() + '"')
 				StateFile.write(",\"" + Msg.Dest + '"')
 				StateFile.write(",\"" + Msg.Message + '"')
-				StateFile.write(",\"" + Msg.TimeSent.strftime(TIMESTAMP_FORMAT)  + '"' + '\n')
+				StateFile.write(",\"" + Msg.TimeSent.strftime(TIMESTAMP_FORMAT)  + '","' + '\n')
 
 			# Now Groups:
 			# Format is: "AccessGroup=<Group Name>,<Nick group MasterNickname 0>,<Nick group MasterNickname N> 
 			for Grp in self.Groups:
 				print "Dumping AccessGroup: " + Grp.GroupName				
-				StateFile.write("AccessGroup=\"" + Grp.GroupName + '"')
+				StateFile.write('AccessGroup=","' + Grp.GroupName + '"')
 				for NickGrp in Grp.NickGroups:
 					StateFile.write(",\"" + NickGrp.GetMasterNickname() + '"')
 
-				StateFile.write('\n')
+				StateFile.write(',"\n')
 
 			# Now new command groupings:
 			# FIXME
@@ -771,7 +771,7 @@ class ShaunBot:
 					
 					print "Loading OfflineMessage from: " + Params[0]					
 					NewOfflineMessage = OfflineMessage(self.GetGroupOfNickname(Params[0]), Params[1], Params[2])
-					NewOfflineMessage.TimeSent = datetime.strptime(Params[3], TIMESTAMP_FORMAT)
+					NewOfflineMessage.TimeSent = datetime.strptime(Params[3], TIMESTAMP_FORMAT) 
 
 					self.OfflineMessageList.AddMessage(NewOfflineMessage)
 					print "Done. \n"
