@@ -1,0 +1,4 @@
+*.pyc
+ircbotframe.py
+state
+log
