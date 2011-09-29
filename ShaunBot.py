@@ -795,8 +795,12 @@ class ShaunBot:
 		# Ensure we know who these people are:		
 		for Nicknames in ADMINS:
 			Grp = self.GetGroupOfNickname(Nicknames[0])			
+			print "Created nick group for " + Nicknames[0]
 			for Nick in Nicknames:
+				print "Added " + Nick + " to that group"				
 				Grp.AddNickname(Nick) # Duplicates are prevented by this routine
+
+		print ""
 
 		for Nicknames in FLAT_MEMBERS:
 			Grp = self.GetGroupOfNickname(Nicknames[0])			
@@ -852,7 +856,12 @@ class ShaunBot:
 		
 		if Message.startswith('!'):
 			# Try to see if it is a command:
-			Cmd = self.CommandList.get(Message.split(' ')[0])
+			Words = Message.split(' ')
+			if len(Words) == 1:			
+				Cmd = self.CommandList.get(Words[0])
+			else:
+				Cmd = self.CommandList.get(Words[0] + ' ') # Space is required for some commands:
+
 			if Cmd != None:
 				# Was a command, is Sender permitted to use it?
 				if Cmd[CMD_GROUPS].AllowAnyone():
@@ -861,7 +870,7 @@ class ShaunBot:
 					# Sender must be in the commands access group:
 					if Sender in Cmd[CMD_GROUPS]:
 						# Sender must also be auth'd with nickserv:
-						self.Bot.identify(Sender, OnCmdAuthSuccess, [self, Sender, ReplyTo, Headers, Message, Cmd], OnAuthFailure, [])
+						self.Bot.identify(Sender, ShaunBot.OnCmdAuthSuccess, [self, Sender, ReplyTo, Headers, Message, Cmd], OnAuthFailure, [])
 						# Command execution is now async, due to network request. all done.
 				
 
