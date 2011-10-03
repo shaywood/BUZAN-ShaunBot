@@ -985,6 +985,8 @@ class ShaunBot:
 			self.Say([CHANNEL], "Hello " + Sender + "! Welcome to #BUZAN, the IRC channel for Bristol's own Zombie defence society! Type !help for help")
 			self.NewestNickGroup = None
 
+		Grp.LastSeen = datetime.now() # Update this attribute, in case of chronic lurkers
+
 		# Deliver message(s), if any:		
 		Messages = self.OfflineMessageList.CheckForMessages(Grp)
 		for Msg in Messages:
