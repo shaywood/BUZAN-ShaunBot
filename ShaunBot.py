@@ -482,7 +482,7 @@ class ShaunBot:
 			return False
 	
 	def GeneralHelpCommand(self, Sender, ReplyTo, Headers, Message, Command):	
-		for Cmd in ShaunBot.DEFAULT_COMMANDS:
+		for Cmd in self.CommandList.values():
 			if Cmd[CMD_GROUPS].AllowAnyone():
 				self.Say([Sender], GetHelpMessage(Cmd))
 			else:
@@ -499,9 +499,9 @@ class ShaunBot:
 			self.Say([Sender], GetHelpMessage(Command)) # Show them how to use this (help) command
 			return True
 
-		Sections[1] = Sections[1].lower()
+		Sections[1] = '!' + Sections[1].lower()
 
-		for Cmd in ShaunBot.DEFAULT_COMMANDS:
+		for Cmd in self.CommandList.values():
 			if Cmd[CMD_CMD] == Sections[1]:
 				# Help wanted for this command:
 				if Cmd[CMD_GROUPS].AllowAnyone():
@@ -752,7 +752,7 @@ class ShaunBot:
 
 				elif LineSections[0] == "NerfSocial":
 					self.NerfSocial = LineSections[1].strip('\n')
-					#print "Set NerfSocial = " + self.NerfSocial
+					#print "Set NerfSo	109.157.232.174cial = " + self.NerfSocial
 
 				elif LineSections[0] == "PubSocial":
 					self.PubSocial = LineSections[1].strip('\n')
