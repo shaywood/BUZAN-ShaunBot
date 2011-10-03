@@ -482,7 +482,7 @@ class ShaunBot:
 			return False
 	
 	def GeneralHelpCommand(self, Sender, ReplyTo, Headers, Message, Command):	
-		for Cmd in DEFAULT_COMMANDS:
+		for Cmd in ShaunBot.DEFAULT_COMMANDS:
 			if Cmd[CMD_GROUPS].AllowAnyone():
 				self.Say([Sender], GetHelpMessage(Cmd))
 			else:
@@ -501,7 +501,7 @@ class ShaunBot:
 
 		Sections[1] = Sections[1].lower()
 
-		for Cmd in DEFAULT_COMMANDS:
+		for Cmd in ShaunBot.DEFAULT_COMMANDS:
 			if Cmd[CMD_CMD] == Sections[1]:
 				# Help wanted for this command:
 				if Cmd[CMD_GROUPS].AllowAnyone():
