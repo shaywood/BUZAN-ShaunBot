@@ -358,6 +358,9 @@ class ShaunBot:
 		if self.LogFile != None:
 			self.LogFile.write(LogStr + '\n')	
 
+		NickGrp = self.GetGroupOfNickname(Sender)
+		NickGrp.LastSeen = datetime.now()
+
 	# Nickname and NickGroup function(s):
 	def GetGroupOfNickname(self, Nickname):
 		""" Returns the IRCNickGroup associated with Nickname.
