@@ -319,6 +319,13 @@ class OfflineMessageList:
 
 		return Result # Ya, rly.
 
+	def PurgeOldItems(self):
+		Now = datetime.now()
+
+		for Msg in self.Messages:
+			if Msg.TimeSent - Now > THIRTY_DAYS:
+				self.Messages.remove(Msg)
+
 # Some final constants:
 # Default command listing.
 # Note the CMD_GROUPS section will be used if there is no state file.
@@ -360,6 +367,20 @@ class ShaunBot:
 
 		NickGrp = self.GetGroupOfNickname(Sender)
 		NickGrp.LastSeen = datetime.now()
+
+	# Backup:
+	def PurgeOldItems(self):
+		Now = datetime.now()
+		
+		# Old nickgroups:
+		for Grp in self.Nickgroups:	
+			if Grp.LastSeen	- Now > THIRTY_DAYS:
+				# Group has expired
+				self.Nickgroups.remove(Grp)
+				print "Nickgroup: " + Grp.GetMasterNickname() + " has expired!"
+
+		# Old messages:
+		self.OfflineMessageList.PurgeOldItems()				
 
 	# Nickname and NickGroup function(s):
 	def GetGroupOfNickname(self, Nickname):
@@ -998,9 +1019,10 @@ class ShaunBot:
 #############################################
 # Backup thread:
 def OnBackup():
-	global ShaunBotInst
+	global ShaunBotInst	
 	
-	# Todo: make things expire.
+	ShaunBotInst.PurgeOldItems()
+
 	ShaunBotInst.WriteStateFile()
 
 global BackupThread
