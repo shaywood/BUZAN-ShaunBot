@@ -483,13 +483,14 @@ class ShaunBot:
 	
 	def GeneralHelpCommand(self, Sender, ReplyTo, Headers, Message, Command):	
 		for Cmd in self.CommandList.values():
-			if Cmd[CMD_GROUPS].AllowAnyone():
-				self.Say([Sender], GetHelpMessage(Cmd))
-			else:
-				# Check if sender is permitted to see this command:
-				if Sender in Cmd[CMD_GROUPS]:
-					self.Bot.identify(Sender, OnAuthSuccess, [Sender, GetHelpMessage(Cmd)], OnAuthFailure, [])
-					# Help message will be sent to sender if auth succeeded.		
+			if Cmd[CMD_HELP_TEXT] != '': # Hidden commands have no help			
+				if Cmd[CMD_GROUPS].AllowAnyone():
+					self.Say([Sender], GetHelpMessage(Cmd))
+				else:
+					# Check if sender is permitted to see this command:
+					if Sender in Cmd[CMD_GROUPS]:
+						self.Bot.identify(Sender, OnAuthSuccess, [Sender, GetHelpMessage(Cmd)], OnAuthFailure, [])
+						# Help message will be sent to sender if auth succeeded.		
 
 		return True
 
@@ -501,18 +502,19 @@ class ShaunBot:
 
 		Sections[1] = '!' + Sections[1].lower()
 
-		for Cmd in self.CommandList.values():
-			if Cmd[CMD_CMD] == Sections[1]:
+		Cmd = self.CommandList.get(Sections[1], None)
+
+		if Cmd != None:						
+			if Cmd[CMD_HELP_TEXT] != '': # Hidden commands have no help
 				# Help wanted for this command:
 				if Cmd[CMD_GROUPS].AllowAnyone():
 					self.Say([Sender], GetHelpMessage(Cmd))
 				else:
 					if Sender in Cmd[CMD_GROUPS]:
 						self.Bot.identify(Sender, OnAuthSuccess, [Sender, GetHelpMessage(Cmd)], OnAuthFailure, [])
-
-				return True
-
-		self.Say([Sender], "I'm sorry, but there is no command \"" + Sections[1] + "\", if you think there should be, contact CarrierII")
+				
+		else:
+			self.Say([Sender], "I'm sorry, but there is no command \"" + Sections[1] + "\", if you think there should be, contact CarrierII")
 
 		return True
 
