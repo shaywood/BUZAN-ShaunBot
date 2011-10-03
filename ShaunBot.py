@@ -482,13 +482,38 @@ class ShaunBot:
 			return False
 	
 	def GeneralHelpCommand(self, Sender, ReplyTo, Headers, Message, Command):	
-		# FIXME when we sort out the way commands will be held in memory...
-		self.Say([Sender], "Sorry, this doesn't work yet")
+		for Cmd in DEFAULT_COMMANDS:
+			if Cmd[CMD_GROUPS].AllowAnyone():
+				self.Say([Sender], GetHelpMessage(Cmd))
+			else:
+				# Check if sender is permitted to see this command:
+				if Sender in Cmd[CMD_GROUPS]:
+					self.Bot.identify(Sender, OnAuthSuccess, [Sender, GetHelpMessage(Cmd)], OnAuthFailure, [])
+					# Help message will be sent to sender if auth succeeded.		
+
 		return True
 
 	def SpecificHelpCommand(self, Sender, ReplyTo, Headers, Message, Command):
-		# FIXME when we sort out the way commands will be held in memory...
-		self.Say([Sender], "Sorry, this doesn't work yet")
+		Sections = Message.split(' ')
+		if len(Sections) < 2 or Sections[1] == '':
+			self.Say([Sender], GetHelpMessage(Command)) # Show them how to use this (help) command
+			return True
+
+		Sections[1] = Sections[1].lower()
+
+		for Cmd in DEFAULT_COMMANDS:
+			if Cmd[CMD_CMD] == Sections[1]:
+				# Help wanted for this command:
+				if Cmd[CMD_GROUPS].AllowAnyone():
+					self.Say([Sender], GetHelpMessage(Cmd))
+				else:
+					if Sender in Cmd[CMD_GROUPS]:
+						self.Bot.identify(Sender, OnAuthSuccess, [Sender, GetHelpMessage(Cmd)], OnAuthFailure, [])
+
+				return True
+
+		self.Say([Sender], "I'm sorry, but there is no command \"" + Sections[1] + "\", if you think there should be, contact CarrierII")
+
 		return True
 
 	def BlargCommand(self, Sender, ReplyTo, Headers, Message, Command):
