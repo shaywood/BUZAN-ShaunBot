@@ -990,7 +990,7 @@ class ShaunBot:
 		Messages = self.OfflineMessageList.CheckForMessages(self.GetGroupOfNickname(Nickname))
 		
 		for Msg in Messages:
-			self.Say([Msg.Dest], str(Msg))
+			self.Say([Nickname], str(Msg))
 
 	def OnJoin(self, Sender, Headers, Message):
 		Grp = self.GetGroupOfNickname(Sender)
