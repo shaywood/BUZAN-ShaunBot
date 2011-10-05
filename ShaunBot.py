@@ -731,8 +731,8 @@ class ShaunBot:
 				#print "Dumping OfflineMessage belonging to: " + Msg.Sender.GetMasterNickname()				
 				StateFile.write("OfflineMessage=\"" + Msg.Sender.GetMasterNickname() + '"')
 				StateFile.write(",\"" + Msg.Dest + '"')				
-				StateFile.write(",\"" + Msg.TimeSent.strftime(TIMESTAMP_FORMAT)  + '"\n')
-				StateFile.write(",\"" + Msg.Message + '"')
+				StateFile.write(",\"" + Msg.TimeSent.strftime(TIMESTAMP_FORMAT)  + '"')
+				StateFile.write(",\"" + Msg.Message + '"\n')
 
 			# Now Groups:
 			# Format is: "AccessGroup=<Group Name>,<Nick group MasterNickname 0>,<Nick group MasterNickname N> 
