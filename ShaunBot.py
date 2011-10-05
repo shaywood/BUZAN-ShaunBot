@@ -313,7 +313,7 @@ class OfflineMessageList:
 		Result = []
 		
 		for Msg in self.Messages:
-			if Msg.Sender == NickGrp:
+			if Msg.Dest in NickGrp:
 				Result.append(Msg)
 				self.Messages.remove(Msg) # Remove that message.
 
@@ -351,6 +351,9 @@ def OnAuthSuccess(Bot, Dest, Message):
 # IRC binding implementations:
 def OnCmdAuthSuccess(Bot, ShaunBotInst, Sender, ReplyTo, Headers, Message, Cmd):
 	Cmd[CMD_FUNC](ShaunBotInst, Sender, ReplyTo, Headers, Message, Cmd) # Call the function, all auth already done.	
+
+def OnJoinAuthSuccess(Bot, ShaunBotInst, Nickname):
+	ShaunBotInst.DeliverMessagesForNickname(Nickname)		
 
 class ShaunBot:
 	# Utility functions:
@@ -978,6 +981,13 @@ class ShaunBot:
 						# Command execution is now async, due to network request. all done.
 				
 
+	def DeliverMessagesForNickname(self, Nickname):
+		# Deliver message(s), if any:		
+		Messages = self.OfflineMessageList.CheckForMessages(self.GetGroupOfNickname(Nickname))
+		
+		for Msg in Messages:
+			self.Say([Msg.Dest], str(Msg))
+
 	def OnJoin(self, Sender, Headers, Message):
 		Grp = self.GetGroupOfNickname(Sender)
 		if Grp == self.NewestNickGroup:
@@ -987,10 +997,7 @@ class ShaunBot:
 
 		Grp.LastSeen = datetime.now() # Update this attribute, in case of chronic lurkers
 
-		# Deliver message(s), if any:		
-		Messages = self.OfflineMessageList.CheckForMessages(Grp)
-		for Msg in Messages:
-			self.Say([Msg.Dest], str(Msg))
+		self.Bot.identify(Sender, OnJoinAuthSuccess, [self, Sender], OnAuthFailure, [])
 
 	def LagHandler(self):
 		global NICKSERV_PASS		
