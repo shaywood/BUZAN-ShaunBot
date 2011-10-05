@@ -633,9 +633,11 @@ class ShaunBot:
 		Dest = Sections[1]
 	
 		Message = ''	
+		Space = ' '
 		# I think there is a faster way to do this?		
-		for i in range(2, len(Sections)):
-			Message = Message + Sections[i] + ' '		
+		#for i in range(2, len(Sections)):
+		#	Message = Message + Sections[i] + ' '		
+		Message = Space.join(Sections[2:])
 
 		OfflineMsg = OfflineMessage(SendersGrp, Dest, Message)		
 
@@ -724,13 +726,13 @@ class ShaunBot:
 				StateFile.write('\n')
 					
 			# Now offline messages:
-			# Format is: OfflineMessage=<Sender's Group's MasterNickname>,<Dest nick>,<Message>,<Timestamp>
+			# Format is: OfflineMessage=<Sender's Group's MasterNickname>,<Dest nick>,<Timestamp>,<Message>
 			for Msg in self.OfflineMessageList.Messages:
 				#print "Dumping OfflineMessage belonging to: " + Msg.Sender.GetMasterNickname()				
 				StateFile.write("OfflineMessage=\"" + Msg.Sender.GetMasterNickname() + '"')
-				StateFile.write(",\"" + Msg.Dest + '"')
-				StateFile.write(",\"" + Msg.Message + '"')
+				StateFile.write(",\"" + Msg.Dest + '"')				
 				StateFile.write(",\"" + Msg.TimeSent.strftime(TIMESTAMP_FORMAT)  + '"\n')
+				StateFile.write(",\"" + Msg.Message + '"')
 
 			# Now Groups:
 			# Format is: "AccessGroup=<Group Name>,<Nick group MasterNickname 0>,<Nick group MasterNickname N> 
@@ -822,19 +824,21 @@ class ShaunBot:
 					#print "Done. \n" # Legibility.
 
 				elif LineSections[0] == "OfflineMessage":
-					# Format is: OfflineMessage=<Sender's Group's MasterNickname>,<Dest nick>,<Message>,<Timestamp>
-					Params = LineSections[1].split(',')
-					for i in range(len(Params)):
+					# Format is: OfflineMessage=<Sender's Group's MasterNickname>,<Dest nick>,<Timestamp>,<Message>
+					Params = LineSections[1].split(',', 3)
+					for i in range(3):
 						Params[i] = Params[i].strip('\n').strip('"')
+	
+					Params[3] = Params[3][1:len(Params[3]) - 2] # All but first and last char.	
 					
-					if len(Params) != 4:
+					if len(Params) < 4:
 						print "Bad OfflineMessage entry, skipping!"
 						print LineSections[1]
 						continue
 					
 					#print "Loading OfflineMessage from: " + Params[0]					
-					NewOfflineMessage = OfflineMessage(self.GetGroupOfNickname(Params[0]), Params[1], Params[2])
-					NewOfflineMessage.TimeSent = datetime.strptime(Params[3], TIMESTAMP_FORMAT) 
+					NewOfflineMessage = OfflineMessage(self.GetGroupOfNickname(Params[0]), Params[1], Params[3])
+					NewOfflineMessage.TimeSent = datetime.strptime(Params[2], TIMESTAMP_FORMAT) 
 
 					self.OfflineMessageList.AddMessage(NewOfflineMessage)
 					#print "Done. \n"
