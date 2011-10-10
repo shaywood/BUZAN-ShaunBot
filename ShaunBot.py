@@ -1080,7 +1080,6 @@ if len(argv) < 2:
 	exit(-1)
 
 global ShaunBotInst
-global BackupThread
 
 ShaunBotInst = ShaunBot(argv[1]) # Nickserv pass
 
