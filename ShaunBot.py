@@ -135,6 +135,7 @@ CMD_STOP_LOGGING = "!stoplog"
 CMD_ABOUT = "!about"
 CMD_TELL = "!tell"
 CMD_MEET = "!meet"
+CMD_UPTIME = "!uptime"
 
 CMD_MC_RESTART = "!mcrestart"
 CMD_MC_STOP = "!mcstop"
@@ -658,11 +659,18 @@ class ShaunBot:
 		
 		return True			
 
+	def UptimeCommand(self, Sender, ReplyTo, Headers, Message, Command):
+		
+		UptimeDelta = self.CreationTime - datetime.now()
+
+		self.Say([Sender], "I have been running for: " + str(UptimeDelta))
+
+		return True
+	
 	# Commands to do:
 	# !insult <nick> <style>, where style can be any of... :D
 	# (Related: !addinsult <style> <text, with %n as nickname; !removeinsult <style> <enough text to uniquely ID it>)
 	# !committee - gives the sender committee contact info. This needs to be settable, so I need a committee group and a place to dump this info.
-	# !meet <nick> - adds <nick> to the bot's list of known people, if it isn't in there already.
 	
 	# CMD, CLASS, GROUPS, USAGE, HELP
 	# This is used do to some initialisation, although the groups value gets overridden by any state file info.
@@ -683,7 +691,8 @@ class ShaunBot:
 		[CMD_GET_PUB_SOCIAL, GetPubSocialCommand, [], CMD_GET_PUB_SOCIAL, "Gets the info about the next pub social"],
 		[CMD_SET_PUB_SOCIAL, SetPubSocialCommand, ["ADMINS"], CMD_GET_PUB_SOCIAL + " <helpful and informative text>", "Sets the Pub Social info"],
 		[CMD_TELL, TellCommand, [], CMD_TELL + " <nickname> <message>", "Gives message to nickname when nickname next signs on"],
-		[CMD_MEET, MeetCommand, [], CMD_MEET + " <nickname>", "Prevents the bot from greeting people"]#,
+		[CMD_MEET, MeetCommand, [], CMD_MEET + " <nickname>", "Prevents the bot from greeting people"],
+		[CMD_UPTIME, UptimeCommand, [], CMD_UPTIME, "Informs you how long the bot has been running for."]
 		# Flat minecraft server related commands:
 		#[CMD_MC_RESTART, MCRestartCommand, [FLAT_MEMBERS], CMD_MC_RESTART, "Restarts the Minecraft server instance, if it is running"],
 		#[CMD_MC_STOP, MCStopCommand, [FLAT_MEMBERS], CMD_MC_STOP, "Stops the Minecraft server instance, if it is running"],
@@ -896,6 +905,7 @@ class ShaunBot:
 		self.NewestNickGroup = None
 		self.Groups = [] # Of IRCAccessGroups
 		self.CommandList = dict()
+		self.CreationTime = datetime.now()
 
 		# Setup some of the defaults:
 		# Need to create the two special groups, ADMINS and FLAT_MEMBERS
