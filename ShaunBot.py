@@ -661,7 +661,7 @@ class ShaunBot:
 
 	def UptimeCommand(self, Sender, ReplyTo, Headers, Message, Command):
 		
-		UptimeDelta = self.CreationTime - datetime.now()
+		UptimeDelta = datetime.now() - self.CreationTime 
 
 		self.Say([Sender], "I have been running for: " + str(UptimeDelta))
 
